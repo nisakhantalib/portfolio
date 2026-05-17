@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Khairunnisa Khan | Portfolio</title>
+    <meta
+      name="description"
+      content="Portfolio of Khairunnisa Khan, a Computer Science graduate and frontend developer focused on web development, machine learning, and NLP."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="Primary navigation">
+      <nav class="nav-shell">
+        <a class="nav-link" href="#home">Home</a>
+        <a class="nav-link" href="#projects">Projects</a>
+        <a class="nav-link" href="#contact">Contact Me</a>
+      </nav>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+        <svg class="theme-icon moon-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 14.7A8.5 8.5 0 0 1 9.3 3a7 7 0 1 0 11.7 11.7Z" />
+        </svg>
+        <svg class="theme-icon sun-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+      </button>
+    </header>
+
+    <main>
+      <section class="hero" id="home">
+        <div class="hero-copy">
+          <p class="eyebrow">Frontend Developer</p>
+          <h1>Hi there, I'm Khairunnisa Khan</h1>
+          <p class="intro">
+            I'm a Computer Science graduate from the University of Manchester with hands-on
+            experience in frontend development, machine learning, natural language processing,
+            and technical solution work.
+          </p>
+          <div class="hero-actions">
+            <a class="resume-button" href="Resume_Khairunnisa_Updated.pdf" download>Download Resume</a>
+            <a class="ghost-button" href="#projects">View Projects</a>
+          </div>
+        </div>
+
+        <div class="portrait-wrap" aria-label="Profile photo area">
+          <div class="portrait">
+            <img src="grad3.jpg" id="profilePhoto" alt="Khairunnisa Khan" hidden />
+            <div class="portrait-fallback" id="profileFallback" aria-hidden="true">
+              <span>KK</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="projects-section" id="projects" aria-labelledby="projectsTitle">
+        <h2 id="projectsTitle">Recent projects</h2>
+        <div class="project-grid" id="projectGrid"></div>
+      </section>
+
+      <section class="contact-section" id="contact" aria-labelledby="contactTitle">
+        <div class="contact-copy">
+          <h2 id="contactTitle">Contact Me</h2>
+          <p>
+            Based in Johor, Malaysia. I am open to frontend, software engineering, and technical
+            solution roles.
+          </p>
+          <div class="contact-links">
+            <a href="mailto:nisakhan6873@gmail.com">nisakhan6873@gmail.com</a>
+            <a href="tel:+60169411968">+60 16 941 1968</a>
+            <a href="https://github.com/nisakhantalib" target="_blank" rel="noreferrer">GitHub profile</a>
+          </div>
+        </div>
+        <form class="contact-form" id="contactForm">
+          <label>
+            Name
+            <input name="name" type="text" placeholder="Your name" required />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            Message
+            <textarea name="message" rows="5" placeholder="Tell me what you are building..." required></textarea>
+          </label>
+          <button class="resume-button" type="submit">Send Message</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; <span id="year"></span> Khairunnisa Khan. Built with care.</p>
+    </footer>
+
+    <script src="projects.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
