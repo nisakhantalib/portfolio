@@ -6,6 +6,7 @@ window.portfolioProjects = {
     type: "Full-Stack AI Application",
     artClass: "bangkit-art",
     tags: [["Next.js", "blue"], ["React", "green"], ["LLM API", "violet"], ["Tailwind CSS", "cyan"], ["React Flow", "gold"]],
+    screenshot: "shots/alphaplus.jpg",
     summary:
       "A full-stack exam-prep platform for Malaysian SPM students with an AI tutor, auto-generated quizzes with automated marking, and an interactive knowledge graph.",
     introTitle: "Bangkit (ALPHA+) - AI-Powered SPM Learning Platform",
@@ -29,6 +30,7 @@ window.portfolioProjects = {
     type: "Interactive Web Application",
     artClass: "paw-art",
     tags: [["React", "blue"], ["Tailwind CSS", "cyan"], ["API", "gold"]],
+    screenshot: "shots/paws.jpg",
     summary:
       "An interactive web application that lets users browse random cat photos through a swipe-based interface.",
     introTitle: "Paws Preferences",
@@ -51,6 +53,7 @@ window.portfolioProjects = {
     type: "Frontend Developer Work",
     artClass: "maqis-art",
     tags: [["Next.js", "blue"], ["React", "green"], ["TypeScript", "violet"], ["Tailwind CSS", "cyan"], ["Recharts", "red"]],
+    screenshot: "shots/maqis.jpg",
     summary:
       "A full-stack admin portal prototype for the MAQIS Digital Platform, built with a modern dashboard interface and reporting components.",
     introTitle: "MAQIS Digital Platform Admin Portal",
