@@ -106,3 +106,30 @@ contactForm.addEventListener("submit", (event) => {
     statusText.textContent = "Message prepared for nisakhan6873@gmail.com.";
   }, 800);
 });
+
+
+// Certificate lightbox: view in-page instead of navigating away
+const lightbox = document.querySelector("#certLightbox");
+const lightboxImg = document.querySelector("#lightboxImg");
+
+if (lightbox) {
+  document.querySelectorAll(".cert-img-link").forEach((linkEl) => {
+    linkEl.addEventListener("click", (event) => {
+      event.preventDefault();
+      lightboxImg.src = linkEl.getAttribute("href");
+      lightbox.hidden = false;
+      document.body.style.overflow = "hidden";
+    });
+  });
+
+  function closeLightbox() {
+    lightbox.hidden = true;
+    lightboxImg.src = "";
+    document.body.style.overflow = "";
+  }
+
+  lightbox.addEventListener("click", closeLightbox);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !lightbox.hidden) closeLightbox();
+  });
+}
