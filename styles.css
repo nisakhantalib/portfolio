@@ -974,3 +974,80 @@ footer {
     width: 100%;
   }
 }
+
+
+/* Certifications */
+.certs-section {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.certs-section h2 {
+  font-size: 2rem;
+  margin: 0 0 24px;
+  color: var(--ink);
+}
+
+.certs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.cert-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+}
+
+.cert-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+.cert-meta {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.cert-link {
+  display: inline-block;
+  margin-right: 10px;
+  color: var(--accent-dark);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.cert-link:hover {
+  text-decoration: underline;
+}
+
+/* Bangkit project art */
+.bangkit-art {
+  position: relative;
+}
+
+.bk-node {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.85;
+}
+
+.bk-node.one { width: 34px; height: 34px; top: 28%; left: 22%; }
+.bk-node.two { width: 22px; height: 22px; top: 58%; left: 48%; background: var(--ink); opacity: 0.55; }
+.bk-node.three { width: 16px; height: 16px; top: 30%; left: 66%; background: var(--accent-dark); }
+
+.bk-spark {
+  position: absolute;
+  top: 44%;
+  left: 30%;
+  width: 42%;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}

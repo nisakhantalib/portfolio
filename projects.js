@@ -1,4 +1,27 @@
 window.portfolioProjects = {
+  bangkit: {
+    title: "Bangkit (ALPHA+) - AI-Powered Learning Platform",
+    owner: "Khairunnisa Khan",
+    date: "2026",
+    type: "Full-Stack AI Application",
+    artClass: "bangkit-art",
+    tags: [["Next.js", "blue"], ["React", "green"], ["LLM API", "violet"], ["Tailwind CSS", "cyan"], ["React Flow", "gold"]],
+    summary:
+      "A full-stack exam-prep platform for Malaysian SPM students with an AI tutor, auto-generated quizzes with automated marking, and an interactive knowledge graph.",
+    introTitle: "Bangkit (ALPHA+) - AI-Powered SPM Learning Platform",
+    overview:
+      "A full-stack learning platform that helps Malaysian SPM students revise Sains and Matematik. It combines curriculum-aligned lessons, past-paper practice, and AI features - a conversational tutor, LLM-generated quizzes with automated marking, and an interactive knowledge graph - in a single three-panel study workspace.",
+    features: [
+      ["AI tutor chat", "Built server-side Next.js API routes that call Groq-hosted LLMs (Llama 3.3 70B and others), with multi-model fallback and provider cooldown logic so AI features stay responsive when a model or provider fails."],
+      ["Quiz generation and marking", "Generated multiple-choice and structured questions from curriculum content with LLMs, and implemented an automated marking endpoint with robust JSON parsing of model output."],
+      ["Interactive knowledge graph", "Visualized chapter and subchapter relationships with React Flow so students can navigate the syllabus as a connected map instead of a linear list."],
+      ["Curriculum content engine", "Rendered Markdown-based Sains and Matematik lessons with diagrams, embedded videos, difficulty levels (beginner to expert), notes, and progress tracking."],
+      ["Past-paper practice", "Integrated digitized SPM trial papers and marking schemes for exam-style practice within the platform."]
+    ],
+    stack: [["Frontend", "Next.js (App Router), React, Tailwind CSS, Framer Motion"], ["AI", "Groq SDK, LLM fallback orchestration, Transformers.js"], ["Visualization", "React Flow, Recharts, react-markdown"]],
+    github: "https://github.com/nisakhantalib/bangkit2",
+    demo: "https://alphaplus-lime.vercel.app/"
+  },
   paws: {
     title: "Paws Preferences",
     owner: "Khairunnisa Khan",
@@ -108,10 +131,11 @@ window.portfolioProjects = {
   }
 };
 
-window.projectOrder = ["paws", "maqis", "testing", "nlp", "database"];
+window.projectOrder = ["bangkit", "maqis", "testing", "paws", "nlp", "database"];
 
 window.renderProjectArt = function renderProjectArt(project) {
   const art = {
+    "bangkit-art": '<span class="bk-node one"></span><span class="bk-node two"></span><span class="bk-node three"></span><span class="bk-spark"></span>',
     "paw-art": '<span class="paw-circle">Paws</span><span class="swipe-card left-card"></span><span class="swipe-card right-card"></span>',
     "maqis-art": '<span class="dashboard-bar"></span><span class="dashboard-panel"></span><span class="dashboard-chart"></span>',
     "testing-art": '<span class="test-window"></span><span class="test-check one"></span><span class="test-check two"></span><span class="test-check three"></span>',
