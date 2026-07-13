@@ -74,7 +74,9 @@ projectGrid.innerHTML = window.projectOrder
     return `
       <article class="project-card">
         <a class="project-card-main" href="project.html?id=${slug}" aria-label="Read more about ${project.title}">
-          ${window.renderProjectArt(project)}
+          ${project.screenshot
+            ? `<img class="project-shot" src="${project.screenshot}" alt="Screenshot of ${project.title}" loading="lazy" />`
+            : window.renderProjectArt(project)}
           <h3>${project.title}</h3>
           <p class="project-type">${project.type}</p>
           <div class="tags" aria-label="Technologies used">${tags}</div>

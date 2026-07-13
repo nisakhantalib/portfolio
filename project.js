@@ -45,7 +45,9 @@ if (!project) {
 } else {
   document.title = `${project.title} | Khairunnisa Khan`;
   detail.innerHTML = `
-    ${window.renderProjectArt(project).replace("project-art", "project-art detail-art")}
+    ${project.screenshot
+      ? `<img class="project-shot detail-shot" src="${project.screenshot}" alt="Screenshot of ${project.title}" loading="lazy" />`
+      : window.renderProjectArt(project).replace("project-art", "project-art detail-art")}
     <h1>${project.title}</h1>
     <p class="detail-meta">${project.owner} / ${project.date}</p>
 

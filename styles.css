@@ -754,3 +754,43 @@ footer {
   main { padding: 0 18px; }
   .project-grid, .certs-grid { grid-template-columns: 1fr; }
 }
+
+/* ============ Certificate images ============ */
+.cert-img-link {
+  display: block;
+  margin: 0 0 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.cert-img-link:hover {
+  transform: scale(1.015);
+  box-shadow: var(--shadow-lift);
+}
+
+.cert-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1100 / 850;
+  object-fit: cover;
+}
+
+/* ============ Project screenshots ============ */
+.project-shot {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.detail-shot {
+  height: auto;
+  max-height: 420px;
+  margin-bottom: 26px;
+}
