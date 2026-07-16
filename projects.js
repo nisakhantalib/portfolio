@@ -1,26 +1,27 @@
 window.portfolioProjects = {
   bangkit: {
-    title: "Bangkit (ALPHA+) - AI-Powered Learning Platform",
+    title: "Bangkit - Multi-Agent AI Learning Platform",
     owner: "Khairunnisa Khan",
     date: "2026",
-    type: "Full-Stack AI Application",
+    type: "Full-Stack GenAI / Agentic System",
     artClass: "bangkit-art",
-    tags: [["Next.js", "blue"], ["React", "green"], ["LLM API", "violet"], ["Tailwind CSS", "cyan"], ["React Flow", "gold"]],
+    tags: [["LangGraph", "violet"], ["Python", "blue"], ["FastAPI", "green"], ["RAG", "gold"], ["Next.js", "cyan"], ["Docker", "red"]],
     screenshot: "shots/alphaplus.jpg",
     summary:
-      "A full-stack exam-prep platform for Malaysian SPM students with an AI tutor, auto-generated quizzes with automated marking, and an interactive knowledge graph.",
-    introTitle: "Bangkit (ALPHA+) - AI-Powered SPM Learning Platform",
+      "A full-stack exam-prep platform for Malaysian SPM students, re-architected around a Python multi-agent service (LangGraph + FastAPI) that plans and executes tutoring, quiz-generation, and marking over a RAG-grounded curriculum.",
+    introTitle: "Bangkit - Multi-Agent AI Learning Platform",
     overview:
-      "A full-stack learning platform that helps Malaysian SPM students revise Sains and Matematik. It combines curriculum-aligned lessons, past-paper practice, and AI features - a conversational tutor, LLM-generated quizzes with automated marking, and an interactive knowledge graph - in a single three-panel study workspace.",
+      "A full-stack learning platform for Malaysian SPM students, evolved from a Next.js app that called LLM APIs directly into a genuine multi-agent system. A Python service (FastAPI + LangGraph) hosts a supervisor agent that classifies intent, extracts subject/chapter scope, and decomposes multi-step requests into an ordered plan, then routes to tutor, quiz-generation, and marking agents - each grounded in a RAG pipeline over curriculum content and digitized SPM past papers. The Next.js frontend remains, now delegating AI work to the service via an opt-in, fall-back-safe integration.",
     features: [
-      ["AI tutor chat", "Built server-side Next.js API routes that call Groq-hosted LLMs (Llama 3.3 70B and others), with multi-model fallback and provider cooldown logic so AI features stay responsive when a model or provider fails."],
-      ["Quiz generation and marking", "Generated multiple-choice and structured questions from curriculum content with LLMs, and implemented an automated marking endpoint with robust JSON parsing of model output."],
-      ["Interactive knowledge graph", "Visualized chapter and subchapter relationships with React Flow so students can navigate the syllabus as a connected map instead of a linear list."],
-      ["Curriculum content engine", "Rendered Markdown-based Sains and Matematik lessons with diagrams, embedded videos, difficulty levels (beginner to expert), notes, and progress tracking."],
-      ["Past-paper practice", "Integrated digitized SPM trial papers and marking schemes for exam-style practice within the platform."]
+      ["Multi-agent orchestration (LangGraph)", "A supervisor agent performs intent classification, scope extraction, and task decomposition - turning a compound request such as 'revise Chapter 1 then quiz me' into an ordered plan that the graph executes step by step, looping through retrieve -> agent for each step."],
+      ["RAG over curriculum + past papers", "Built an ingestion pipeline (markdown-aware chunking, BGE embeddings, metadata-filtered vector store) so the tutor answers strictly from retrieved content and cites the exact chapter and section, with digitized SPM papers and marking schemes as a separate collection."],
+      ["Schema-validated structured output", "Quiz-generation and marking agents validate every response against Pydantic contracts and self-heal with a repair prompt on failure - replacing brittle JSON parsing with an enforced contract at the boundary."],
+      ["Resilient LLM layer", "A Python model router provides multi-model fallback with exponential-backoff cooldown across Groq-hosted models, assigning a fast cheap model to routing and a larger model to tutoring and marking."],
+      ["Evaluation harness ('TDD for agents')", "Golden datasets and metrics measure marking accuracy and answer groundedness, running in CI against a scripted model and against real models locally, with optional LangSmith tracing - applying test-automation discipline to LLM behaviour."],
+      ["Containerized and CI/CD-ready", "Multi-stage Docker build, GitHub Actions CI (lint, tests, eval smoke, image build), API-key auth and CORS for server-to-server use, and a cloud deploy pipeline (Azure Container Apps / AWS App Runner - the same image runs on either)."]
     ],
-    stack: [["Frontend", "Next.js (App Router), React, Tailwind CSS, Framer Motion"], ["AI", "Groq SDK, LLM fallback orchestration, Transformers.js"], ["Visualization", "React Flow, Recharts, react-markdown"]],
-    github: "https://github.com/nisakhantalib/bangkit2",
+    stack: [["AI service", "Python, FastAPI, LangGraph, Pydantic"], ["RAG", "BGE embeddings (FastEmbed), metadata-filtered vector store, LangSmith"], ["LLM", "Groq SDK (Llama 3.3 70B), multi-model fallback router"], ["Frontend", "Next.js (App Router), React, Tailwind CSS"], ["Infra", "Docker, GitHub Actions, Azure Container Apps / AWS App Runner"]],
+    github: "https://github.com/nisakhantalib/bangkit-agentic",
     demo: "https://alphaplus-lime.vercel.app/"
   },
   paws: {
