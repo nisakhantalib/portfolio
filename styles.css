@@ -855,3 +855,93 @@ footer {
 .hiw-line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
 .how-steps { margin: 0; padding-left: 1.25rem; display: grid; gap: 0.5rem; }
 .how-steps li { line-height: 1.6; }
+
+/* ---- Bangkit deep-dive: technical walkthrough on the project page ---- */
+.dd h2 { margin-top: 0; }
+.dd .dd-list { margin: 0 0 1rem; padding-left: 1.2rem; display: grid; gap: 0.55rem; }
+.dd .dd-list li { line-height: 1.65; }
+.dd-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em;
+  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px;
+  padding: 1px 6px; color: var(--accent);
+}
+.dd-src, .dd-fix {
+  font-size: 0.82rem; color: var(--muted); margin: 0.75rem 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.dd-fix { margin-top: 0.4rem; }
+.dd-src a, .dd-fix a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted currentColor; }
+.dd-src a:hover, .dd-fix a:hover { opacity: 0.8; }
+
+.dd-pre {
+  background: var(--card-strong); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; overflow-x: auto; margin: 1rem 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.6;
+  color: var(--text);
+}
+.dd-pre .c { color: var(--muted); }
+.dd-pre .k { color: #a98bf0; }
+.dd-pre .s { color: var(--accent); }
+.dd-pre .f { color: #5aa2f0; }
+
+.dd-fig { margin: 1.5rem 0; }
+.dd-fig svg { width: 100%; height: auto; display: block; color: var(--muted); }
+.dd-cap {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.76rem;
+  color: var(--muted); text-align: center; margin-top: 0.6rem;
+}
+.hiw-box { fill: var(--card); stroke: var(--border); stroke-width: 1; }
+.hiw-region { fill: var(--bg-soft); stroke: var(--border); }
+.hiw-accent { fill: color-mix(in srgb, var(--accent) 14%, var(--card)); stroke: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+.hiw-amber { fill: color-mix(in srgb, #d97706 15%, var(--card)); stroke: color-mix(in srgb, #d97706 50%, var(--border)); }
+.hiw-violet { fill: color-mix(in srgb, #8b5cf6 15%, var(--card)); stroke: color-mix(in srgb, #8b5cf6 50%, var(--border)); }
+.hiw-t { fill: var(--text); font-size: 14px; font-weight: 600; }
+.hiw-s { fill: var(--muted); font-size: 11.5px; }
+.hiw-mono { fill: var(--muted); font-size: 11px; font-family: ui-monospace, "SF Mono", monospace; }
+.hiw-line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+
+.dd-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin: 1.25rem 0; }
+@media (max-width: 620px) { .dd-cards { grid-template-columns: 1fr; } }
+.dd-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; }
+.dd-card h4 { margin: 0 0 0.45rem; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
+.dd-card .dd-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dd-card p { margin: 0; font-size: 0.88rem; }
+
+.dd-det { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; margin: 1rem 0; overflow: hidden; }
+.dd-det summary { cursor: pointer; padding: 0.85rem 1.1rem; font-weight: 600; font-size: 0.9rem; list-style: none; }
+.dd-det summary::-webkit-details-marker { display: none; }
+.dd-det summary::before { content: "▸ "; color: var(--accent); display: inline-block; transition: transform 0.2s; }
+.dd-det[open] summary::before { content: "▾ "; }
+.dd-det > div { padding: 0 1.1rem 1.1rem; }
+.dd-det p { font-size: 0.88rem; }
+
+.dd-bugs { margin-top: 1.1rem; }
+.dd-bug { display: flex; gap: 0.9rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border); }
+.dd-bug:last-child { border-bottom: none; }
+.dd-bug > span { font-family: ui-monospace, monospace; font-size: 0.8rem; color: #e0603a; flex: none; width: 1.6rem; padding-top: 0.15rem; }
+.dd-bug h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+.dd-bug p { margin: 0; font-size: 0.85rem; }
+
+/* Interactive simulator */
+.dds { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin: 0.5rem 0; }
+.dds-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.dds-tab { flex: 1; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: 0.85rem; font-weight: 500; padding: 0.8rem 0.5rem; cursor: pointer; transition: all 0.15s; }
+.dds-tab:hover { color: var(--text); background: var(--bg-soft); }
+.dds-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+.dds-req { font-family: ui-monospace, monospace; font-size: 0.76rem; color: var(--muted); padding: 0.7rem 1.1rem; border-bottom: 1px solid var(--border); background: var(--bg-soft); }
+.dds-req span { color: var(--text); }
+.dds-stage { padding: 1.3rem 1.1rem; min-height: 170px; }
+.dds-badge { display: inline-block; font-family: ui-monospace, monospace; font-size: 0.7rem; font-weight: 600; border: 1px solid; border-radius: 6px; padding: 3px 10px; margin-bottom: 0.8rem; color: var(--bc); border-color: color-mix(in srgb, var(--bc) 55%, transparent); background: color-mix(in srgb, var(--bc) 12%, transparent); }
+.dds-title { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+.dds-detail { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.9rem; line-height: 1.6; }
+.dds-data { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--accent); background: var(--card-strong); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.8rem; word-break: break-word; line-height: 1.5; }
+.dds-dots { display: flex; gap: 6px; justify-content: center; padding: 0.3rem 0 0.9rem; }
+.dds-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: all 0.2s; }
+.dds-dot.on { background: var(--accent); transform: scale(1.3); }
+.dds-dot.done { background: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.dds-nav { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.1rem; border-top: 1px solid var(--border); background: var(--bg-soft); }
+.dds-btn { background: var(--card-strong); border: 1px solid var(--border); color: var(--text); font: inherit; font-size: 0.85rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+.dds-btn:hover:not(:disabled) { border-color: var(--muted); }
+.dds-btn:disabled { opacity: 0.35; cursor: default; }
+.dds-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.dds-count { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--muted); }
