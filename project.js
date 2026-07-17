@@ -66,6 +66,15 @@ if (!project) {
       <ul>${renderList(project.stack)}</ul>
     </section>
 
+    ${project.howItWorks ? `
+    <section class="detail-section how-it-works">
+      <h2>How it works</h2>
+      <p class="detail-lead">${project.howItWorks.intro}</p>
+      ${project.howItWorks.diagram}
+      <ol class="how-steps">${project.howItWorks.steps.map((s) => `<li><strong>${s[0]}</strong> - ${s[1]}</li>`).join("")}</ol>
+    </section>
+    ` : ""}
+
     <section class="detail-section">
       <h2>GitHub & Live Demo</h2>
       <ul>${renderLinks(project)}</ul>

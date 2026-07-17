@@ -21,6 +21,68 @@ window.portfolioProjects = {
       ["Containerized and CI/CD-ready", "Multi-stage Docker build, GitHub Actions CI (lint, tests, eval smoke, image build), API-key auth and CORS for server-to-server use, and a cloud deploy pipeline (Azure Container Apps / AWS App Runner - the same image runs on either)."]
     ],
     stack: [["AI service", "Python, FastAPI, LangGraph, Pydantic"], ["RAG", "Embedding-based retrieval, metadata-filtered vector store, source citations, LangSmith tracing"], ["LLM", "Groq SDK (Llama 3.3 70B), multi-model fallback router"], ["Frontend", "Next.js (App Router), React, Tailwind CSS"], ["Infra", "Docker, GitHub Actions CI/CD, Azure Container Apps (live), ACR"]],
+    howItWorks: {
+      intro:
+        "The simplest way to picture it: a student walks into a tutoring center. A receptionist figures out what kind of help they need and sends them to the right specialist - one explains concepts, one writes practice quizzes, one grades answers. Crucially, before answering, the specialist pulls the actual textbook page and answers from that, telling you which page they used. That is exactly this system: the receptionist is the \"supervisor\", the specialists are the \"agents\", the textbook is a searchable \"vector store\", and \"which page\" is the citation.",
+      diagram: `<svg class="hiw-diagram" viewBox="0 0 640 560" role="img" aria-label="How a student question flows through the system">
+  <defs><marker id="hiwArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+  <g font-family="Inter, sans-serif">
+    <rect x="230" y="16" width="180" height="50" rx="10" class="hiw-box hiw-neutral"/>
+    <text x="320" y="38" text-anchor="middle" class="hiw-t">1. Student asks</text>
+    <text x="320" y="55" text-anchor="middle" class="hiw-s">in the browser</text>
+    <line x1="320" y1="66" x2="320" y2="92" class="hiw-line" marker-end="url(#hiwArrow)"/>
+
+    <rect x="210" y="96" width="220" height="50" rx="10" class="hiw-box hiw-blue"/>
+    <text x="320" y="118" text-anchor="middle" class="hiw-t">2. Frontend (Vercel)</text>
+    <text x="320" y="135" text-anchor="middle" class="hiw-s">Next.js forwards the question</text>
+    <line x1="320" y1="146" x2="320" y2="172" class="hiw-line" marker-end="url(#hiwArrow)"/>
+
+    <rect x="40" y="176" width="560" height="300" rx="16" class="hiw-region"/>
+    <text x="320" y="200" text-anchor="middle" class="hiw-region-label">3. Agent service (Python, on Azure)</text>
+
+    <rect x="220" y="216" width="200" height="50" rx="10" class="hiw-box hiw-accent"/>
+    <text x="320" y="238" text-anchor="middle" class="hiw-t">Supervisor</text>
+    <text x="320" y="255" text-anchor="middle" class="hiw-s">reads it, makes a plan</text>
+
+    <line x1="270" y1="266" x2="165" y2="312" class="hiw-line" marker-end="url(#hiwArrow)"/>
+    <line x1="320" y1="266" x2="320" y2="312" class="hiw-line" marker-end="url(#hiwArrow)"/>
+    <line x1="370" y1="266" x2="475" y2="312" class="hiw-line" marker-end="url(#hiwArrow)"/>
+
+    <rect x="70" y="316" width="150" height="50" rx="10" class="hiw-box hiw-accent"/>
+    <text x="145" y="338" text-anchor="middle" class="hiw-t">Tutor</text>
+    <text x="145" y="355" text-anchor="middle" class="hiw-s">explains</text>
+
+    <rect x="245" y="316" width="150" height="50" rx="10" class="hiw-box hiw-accent"/>
+    <text x="320" y="338" text-anchor="middle" class="hiw-t">Quiz maker</text>
+    <text x="320" y="355" text-anchor="middle" class="hiw-s">sets questions</text>
+
+    <rect x="420" y="316" width="150" height="50" rx="10" class="hiw-box hiw-accent"/>
+    <text x="495" y="338" text-anchor="middle" class="hiw-t">Marker</text>
+    <text x="495" y="355" text-anchor="middle" class="hiw-s">grades answers</text>
+
+    <line x1="145" y1="366" x2="270" y2="410" class="hiw-line" marker-end="url(#hiwArrow)"/>
+    <line x1="320" y1="366" x2="320" y2="410" class="hiw-line" marker-end="url(#hiwArrow)"/>
+    <line x1="495" y1="366" x2="370" y2="410" class="hiw-line" marker-end="url(#hiwArrow)"/>
+
+    <rect x="210" y="414" width="220" height="50" rx="10" class="hiw-box hiw-amber"/>
+    <text x="320" y="436" text-anchor="middle" class="hiw-t">Curriculum library</text>
+    <text x="320" y="453" text-anchor="middle" class="hiw-s">finds the real lesson text</text>
+
+    <line x1="320" y1="476" x2="320" y2="502" class="hiw-line" marker-end="url(#hiwArrow)"/>
+
+    <rect x="205" y="506" width="230" height="50" rx="10" class="hiw-box hiw-green"/>
+    <text x="320" y="528" text-anchor="middle" class="hiw-t">4. Grounded answer</text>
+    <text x="320" y="545" text-anchor="middle" class="hiw-s">with a citation, back to student</text>
+  </g>
+</svg>`,
+      steps: [
+        ["Student asks", "A question is typed in the browser on the live site."],
+        ["Frontend forwards it", "The Next.js app on Vercel passes the question to the AI service - it does not answer itself."],
+        ["Supervisor plans", "The Python agent service (running on Azure) reads the question, works out the intent, and routes it to the right agent - tutor, quiz maker, or marker."],
+        ["Agent retrieves real content", "Before answering, the agent searches the curriculum library for the actual matching lesson text, so nothing is made up."],
+        ["Grounded answer returns", "The answer comes back with a citation to the exact chapter and section, all the way back to the student."]
+      ]
+    },
     github: "https://github.com/nisakhantalib/bangkit-agentic",
     demo: "https://bangkit-agentic.vercel.app/"
   },

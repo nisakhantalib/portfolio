@@ -831,3 +831,27 @@ footer {
 }
 
 .lightbox-close:hover { background: rgba(255, 255, 255, 0.26); }
+
+/* How it works — architecture explainer on project detail pages */
+.how-it-works .detail-lead { margin-bottom: 1.25rem; }
+.hiw-diagram {
+  width: 100%;
+  height: auto;
+  max-width: 560px;
+  margin: 0 auto 1.5rem;
+  display: block;
+  color: var(--muted);
+}
+.hiw-box { fill: var(--card); stroke: var(--border); stroke-width: 1; }
+.hiw-region { fill: var(--bg-soft); stroke: var(--border); stroke-width: 1; }
+.hiw-neutral { fill: var(--card-strong); }
+.hiw-blue { fill: color-mix(in srgb, #378add 14%, var(--card)); stroke: color-mix(in srgb, #378add 45%, var(--border)); }
+.hiw-accent { fill: color-mix(in srgb, var(--accent) 14%, var(--card)); stroke: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.hiw-amber { fill: color-mix(in srgb, #ba7517 16%, var(--card)); stroke: color-mix(in srgb, #ba7517 45%, var(--border)); }
+.hiw-green { fill: color-mix(in srgb, #639922 16%, var(--card)); stroke: color-mix(in srgb, #639922 45%, var(--border)); }
+.hiw-t { fill: var(--text); font-size: 14px; font-weight: 600; }
+.hiw-s { fill: var(--muted); font-size: 12px; }
+.hiw-region-label { fill: var(--text); font-size: 14px; font-weight: 600; }
+.hiw-line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.how-steps { margin: 0; padding-left: 1.25rem; display: grid; gap: 0.5rem; }
+.how-steps li { line-height: 1.6; }
