@@ -72,6 +72,7 @@ if (!project) {
       <p class="detail-lead">${project.howItWorks.intro}</p>
       ${project.howItWorks.diagram}
       <ol class="how-steps">${project.howItWorks.steps.map((s) => `<li><strong>${s[0]}</strong> - ${s[1]}</li>`).join("")}</ol>
+      ${project.howItWorks.explainerUrl ? `<p><a class="cert-link" href="${project.howItWorks.explainerUrl}" target="_blank" rel="noreferrer">Read the full technical walkthrough &rarr;</a></p>` : ""}
     </section>
     ` : ""}
 

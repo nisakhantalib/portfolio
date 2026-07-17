@@ -75,6 +75,7 @@ window.portfolioProjects = {
     <text x="320" y="545" text-anchor="middle" class="hiw-s">with a citation, back to student</text>
   </g>
 </svg>`,
+      explainerUrl: "bangkit-explainer.html",
       steps: [
         ["Student asks", "A question is typed in the browser on the live site."],
         ["Frontend forwards it", "The Next.js app on Vercel passes the question to the AI service - it does not answer itself."],
