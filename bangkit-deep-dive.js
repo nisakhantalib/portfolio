@@ -276,3 +276,107 @@
   }
   render();
 })();
+
+// ---- Evaluation, live proof, and skills map (inserted by heading anchors) ----
+(function () {
+  const GH = "https://github.com/nisakhantalib/bangkit-agentic/blob/master/";
+  const secs = [...document.querySelectorAll("#projectDetail .dd")];
+  const deploySec = secs.find(s => s.querySelector("h2")?.textContent.includes("shipping it"));
+  const bugSec = secs.find(s => s.querySelector(".dd-bugs"));
+  if (!deploySec || !bugSec) return;
+
+  // --- Evaluation section: inserted BEFORE the deployment layer ---
+  const evalHtml = `
+  <section class="detail-section dd">
+    <h2>Evaluation &mdash; "TDD for agents"</h2>
+    <p>An LLM's output can silently degrade: a prompt tweak that improves tutoring might break marking. So the agents are tested the way UI code is tested &mdash; against fixed expectations, on every push.</p>
+    <ul class="dd-list">
+      <li><strong>Golden datasets.</strong> Hand-written cases with known-correct outcomes: marking cases (question, student answer, expected score bounds, concepts the feedback must mention) and tutor cases (question, facts the answer must include, citation required). Deliberately small starter sets &mdash; the honest scaling answer is "grow the datasets and track pass rates over time".</li>
+      <li><strong>Metric functions.</strong> Each output is scored programmatically: is the awarded mark within the expected bounds? Does feedback surface the required concepts? Is the answer grounded and cited?</li>
+      <li><strong>Two run modes.</strong> In CI, the harness runs against a scripted fake model &mdash; fast, free, deterministic &mdash; guarding the metric logic and graph wiring on every push. Locally, the same harness runs against real Groq models for true accuracy numbers.</li>
+    </ul>
+    <pre class="dd-pre"><span class="c"># evals/metrics.py — marking is judged, not trusted</span>
+<span class="k">def</span> <span class="f">marking_within_tolerance</span>(result, case):
+    <span class="k">if</span> result[<span class="s">"total_max"</span>] != case[<span class="s">"expected_total_max"</span>]: <span class="k">return</span> <span class="k">False</span>
+    awarded = result[<span class="s">"total_awarded"</span>]
+    <span class="k">return</span> case[<span class="s">"min"</span>] &lt;= awarded &lt;= case[<span class="s">"max"</span>]
+
+<span class="c"># evals/runner.py — same harness, swappable model</span>
+<span class="k">for</span> report <span class="k">in</span> <span class="f">run_all</span>(model_router.complete):
+    <span class="f">print</span>(report)   <span class="c"># marking_accuracy: 4/4 · tutor_groundedness: 3/3</span></pre>
+    <p class="dd-src">In the code: <a href="${GH}ai-service/evals/metrics.py" target="_blank" rel="noreferrer">ai-service/evals/metrics.py</a> &middot; <a href="${GH}ai-service/evals/runner.py" target="_blank" rel="noreferrer">ai-service/evals/runner.py</a> &middot; <a href="${GH}ai-service/evals/datasets" target="_blank" rel="noreferrer">ai-service/evals/datasets/</a> &middot; <a href="${GH}ai-service/tests/test_evals.py" target="_blank" rel="noreferrer">ai-service/tests/test_evals.py</a></p>
+  </section>`;
+  deploySec.insertAdjacentHTML("beforebegin", evalHtml);
+
+  // --- Live proof section: inserted AFTER the bug log ---
+  const liveHtml = `
+  <section class="detail-section dd" id="ddLive">
+    <h2>Live deployment &mdash; verify it yourself</h2>
+    <p>The service below is the real thing running on Azure Container Apps. It scales to zero when idle, so the first check after a quiet period takes ~20 seconds while the container cold-starts.</p>
+    <div class="dd-livebox">
+      <div class="dd-liverow">
+        <span class="dd-livedot" id="ddLiveDot"></span>
+        <span id="ddLiveText">Checking service status&hellip;</span>
+        <button class="dds-btn" id="ddLiveBtn" style="margin-left:auto">Check now</button>
+      </div>
+      <div class="dds-data" id="ddLiveData" style="margin-top:0.7rem; display:none"></div>
+    </div>
+    <ul class="dd-list" style="margin-top:1rem">
+      <li><strong>Live app:</strong> <a href="https://bangkit-agentic.vercel.app" target="_blank" rel="noreferrer">bangkit-agentic.vercel.app</a> &mdash; ask the tutor a question and watch it answer with a citation.</li>
+      <li><strong>Health endpoint:</strong> <a href="https://bangkit-ai-service.proudstone-816d3797.southeastasia.azurecontainerapps.io/health" target="_blank" rel="noreferrer">/health</a> &mdash; the raw service response, straight from Azure.</li>
+      <li><strong>Pipeline:</strong> <a href="https://github.com/nisakhantalib/bangkit-agentic/actions" target="_blank" rel="noreferrer">GitHub Actions</a> &mdash; every merge to master tests, builds, and deploys automatically.</li>
+    </ul>
+    <div class="dd-shots">
+      <figure><img src="shots/azure-containerapp.png" alt="Azure Container App overview" loading="lazy" onerror="this.closest('figure').remove()"/><figcaption>Azure Container App: revisions, scaling, and the deployed image</figcaption></figure>
+      <figure><img src="shots/azure-deploy-run.png" alt="GitHub Actions deploy run" loading="lazy" onerror="this.closest('figure').remove()"/><figcaption>A green deploy run: OIDC login &rarr; build &rarr; push &rarr; rollout</figcaption></figure>
+      <figure><img src="shots/bangkit-demo.gif" alt="Live demo of the tutor answering with a citation" loading="lazy" onerror="this.closest('figure').remove()"/><figcaption>The tutor answering with a curriculum citation, live</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="detail-section dd">
+    <h2>Skills demonstrated &mdash; mapped to the code</h2>
+    <p>Each core junior AI-engineering competency, tied to the file that implements it in this repo. And, honestly stated, what this project does <em>not</em> cover.</p>
+    <div class="dd-skillgrid">
+      <div class="dd-skill"><h4>LLM API integration</h4><p>Multi-model router with fallback + exponential-backoff cooldown across Groq-hosted Llama models.</p><a href="${GH}ai-service/app/llm/router.py" target="_blank" rel="noreferrer">app/llm/router.py</a></div>
+      <div class="dd-skill"><h4>Prompt engineering</h4><p>Role-scoped system prompts: grounding constraints, citation requirements, JSON-only contracts, repair prompts.</p><a href="${GH}ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">app/graph/nodes.py</a></div>
+      <div class="dd-skill"><h4>RAG</h4><p>Markdown-aware chunking, embeddings, cosine retrieval with metadata filters and graceful filter relaxation.</p><a href="${GH}ai-service/app/rag" target="_blank" rel="noreferrer">app/rag/</a></div>
+      <div class="dd-skill"><h4>Agent orchestration</h4><p>LangGraph supervisor: intent classification, task decomposition into plans, conditional routing, execution loop.</p><a href="${GH}ai-service/app/graph" target="_blank" rel="noreferrer">app/graph/</a></div>
+      <div class="dd-skill"><h4>Structured output</h4><p>Pydantic-validated agent responses with a one-shot self-repair retry before graceful degradation.</p><a href="${GH}ai-service/app/schemas/quiz.py" target="_blank" rel="noreferrer">app/schemas/quiz.py</a></div>
+      <div class="dd-skill"><h4>LLM evaluation</h4><p>Golden datasets + metric functions; CI smoke against a scripted model, real-model runs locally; optional LangSmith tracing.</p><a href="${GH}ai-service/evals" target="_blank" rel="noreferrer">evals/</a></div>
+      <div class="dd-skill"><h4>Testing</h4><p>31 pytest tests: unit, graph integration with fakes, API-level, auth behaviour, and regression tests pinning fixed bugs.</p><a href="${GH}ai-service/tests" target="_blank" rel="noreferrer">tests/</a></div>
+      <div class="dd-skill"><h4>Deployment / AI infra</h4><p>Multi-stage Docker, GitHub Actions CI/CD with OIDC (no stored cloud secrets), Azure Container Apps with scale-to-zero.</p><a href="${GH}.github/workflows/deploy.yml" target="_blank" rel="noreferrer">deploy.yml</a> &middot; <a href="${GH}ai-service/Dockerfile" target="_blank" rel="noreferrer">Dockerfile</a></div>
+      <div class="dd-skill"><h4>Security</h4><p>Server-side secret handling, API-key auth on /v1 routes, CORS allow-listing, secrets in Azure's encrypted store.</p><a href="${GH}ai-service/app/security.py" target="_blank" rel="noreferrer">app/security.py</a></div>
+    </div>
+    <p class="dd-notcovered"><strong>Not covered by this project</strong> (stated plainly rather than implied): model fine-tuning and multimodal (vision/audio) inputs. Classical model training &mdash; BERT and Bi-LSTM in PyTorch &mdash; is demonstrated separately in the <a href="project.html?id=evidence">Evidence Detection</a> project.</p>
+  </section>`;
+  bugSec.insertAdjacentHTML("afterend", liveHtml);
+
+  // --- Live status widget logic ---
+  const HEALTH = "https://bangkit-ai-service.proudstone-816d3797.southeastasia.azurecontainerapps.io/health";
+  const dot = document.getElementById("ddLiveDot");
+  const txt = document.getElementById("ddLiveText");
+  const dataEl = document.getElementById("ddLiveData");
+  const btn = document.getElementById("ddLiveBtn");
+
+  async function check() {
+    dot.className = "dd-livedot wait"; txt.textContent = "Contacting the service (cold start can take ~20s)…";
+    dataEl.style.display = "none"; btn.disabled = true;
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 45000);
+      const res = await fetch(HEALTH, { signal: ctrl.signal });
+      clearTimeout(timer);
+      const body = await res.json();
+      dot.className = "dd-livedot ok";
+      txt.textContent = "Service is live on Azure — responding right now.";
+      dataEl.textContent = "GET /health → " + JSON.stringify(body);
+      dataEl.style.display = "block";
+    } catch (e) {
+      dot.className = "dd-livedot err";
+      txt.textContent = "Couldn't reach the service from this page (it may be scaled to zero, or the browser blocked the cross-origin call). The /health link above works directly.";
+    }
+    btn.disabled = false;
+  }
+  btn.addEventListener("click", check);
+  check();
+})();
