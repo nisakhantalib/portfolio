@@ -1,26 +1,26 @@
 window.portfolioProjects = {
   bangkit: {
-    title: "Bangkit - Multi-Agent AI Learning Platform",
+    title: "Bangkit - Multi-Agent AI Learning Platform (Prototype)",
     owner: "Khairunnisa Khan",
     date: "2026",
-    type: "Full-Stack GenAI / Agentic System",
+    type: "Full-Stack GenAI / Agentic System (Prototype)",
     artClass: "bangkit-art",
     tags: [["LangGraph", "violet"], ["Python", "blue"], ["FastAPI", "green"], ["RAG", "gold"], ["Next.js", "cyan"], ["Docker", "red"]],
     screenshot: "shots/alphaplus.jpg",
     summary:
-      "A full-stack exam-prep platform for Malaysian SPM students, re-architected around a Python multi-agent service (LangGraph + FastAPI) that plans and executes tutoring, quiz-generation, and marking over a RAG-grounded curriculum.",
-    introTitle: "Bangkit - Multi-Agent AI Learning Platform",
+      "A prototype exam-prep platform for Malaysian SPM students. The AI layer was rebuilt into a Python multi-agent service (LangGraph + FastAPI) with a supervisor coordinating tutor, quiz-generation, and marking agents over a RAG-grounded curriculum.",
+    introTitle: "Bangkit - Multi-Agent AI Learning Platform (Prototype)",
     overview:
-      "A full-stack learning platform for Malaysian SPM students, evolved from a Next.js app that called LLM APIs directly into a genuine multi-agent system. A Python service (FastAPI + LangGraph) hosts a supervisor agent that classifies intent, extracts subject/chapter scope, and decomposes multi-step requests into an ordered plan, then routes to tutor, quiz-generation, and marking agents - each grounded in a RAG pipeline over curriculum content and digitized SPM past papers. The Next.js frontend remains, now delegating AI work to the service via an opt-in, fall-back-safe integration.",
+      "A prototype learning platform for Malaysian SPM students. The AI layer was rebuilt from direct LLM API calls into a Python multi-agent service (FastAPI + LangGraph): a supervisor agent classifies intent, extracts subject/chapter scope, and decomposes multi-step requests into an ordered plan, then routes to tutor, quiz-generation, and marking agents - each grounded in a RAG pipeline over curriculum content and digitized SPM past papers. The Next.js frontend delegates AI work to the service via an opt-in, fall-back-safe integration.",
     features: [
       ["Multi-agent orchestration (LangGraph)", "A supervisor agent performs intent classification, scope extraction, and task decomposition - turning a compound request such as 'revise Chapter 1 then quiz me' into an ordered plan that the graph executes step by step, looping through retrieve -> agent for each step."],
-      ["RAG over curriculum + past papers", "Built an ingestion pipeline (markdown-aware chunking, embedding-based retrieval, metadata-filtered vector store) so the tutor answers strictly from retrieved content and cites the exact chapter and section, with digitized SPM papers and marking schemes as a separate collection."],
+      ["RAG over curriculum + past papers", "Built an ingestion pipeline (markdown-aware chunking, BGE-capable embeddings with a reliability fallback, metadata-filtered vector store) so the tutor answers strictly from retrieved content and cites the exact chapter and section, with digitized SPM papers and marking schemes as a separate collection."],
       ["Schema-validated structured output", "Quiz-generation and marking agents validate every response against Pydantic contracts and self-heal with a repair prompt on failure - replacing brittle JSON parsing with an enforced contract at the boundary."],
       ["Resilient LLM layer", "A Python model router provides multi-model fallback with exponential-backoff cooldown across Groq-hosted models, assigning a fast cheap model to routing and a larger model to tutoring and marking."],
       ["Evaluation harness ('TDD for agents')", "Golden datasets and metrics measure marking accuracy and answer groundedness, running in CI against a scripted model and against real models locally, with optional LangSmith tracing - applying test-automation discipline to LLM behaviour."],
       ["Containerized and CI/CD-ready", "Multi-stage Docker build, GitHub Actions CI (lint, tests, eval smoke, image build), API-key auth and CORS for server-to-server use, and a cloud deploy pipeline (Azure Container Apps / AWS App Runner - the same image runs on either)."]
     ],
-    stack: [["AI service", "Python, FastAPI, LangGraph, Pydantic"], ["RAG", "Embedding-based retrieval, metadata-filtered vector store, source citations, LangSmith tracing"], ["LLM", "Groq SDK (Llama 3.3 70B), multi-model fallback router"], ["Frontend", "Next.js (App Router), React, Tailwind CSS"], ["Infra", "Docker, GitHub Actions CI/CD, Azure Container Apps (live), ACR"]],
+    stack: [["AI service", "Python, FastAPI, LangGraph, Pydantic"], ["RAG", "Chunking + embeddings (BGE-capable, degrades gracefully), metadata-filtered vector store, LangSmith"], ["LLM", "Groq SDK (Llama 3.3 70B), multi-model fallback router"], ["Frontend", "Next.js (App Router), React, Tailwind CSS"], ["Infra", "Docker, GitHub Actions CI/CD, Azure Container Apps (live), ACR"]],
     howItWorks: {
       intro:
         "The simplest way to picture it: a student walks into a tutoring center. A receptionist figures out what kind of help they need and sends them to the right specialist - one explains concepts, one writes practice quizzes, one grades answers. Crucially, before answering, the specialist pulls the actual textbook page and answers from that, telling you which page they used. That is exactly this system: the receptionist is the \"supervisor\", the specialists are the \"agents\", the textbook is a searchable \"vector store\", and \"which page\" is the citation.",
