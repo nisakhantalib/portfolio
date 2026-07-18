@@ -57,15 +57,20 @@
         <rect x="460" y="152" width="150" height="52" rx="10" class="hiw-box"/>
         <text class="hiw-t" x="535" y="174" text-anchor="middle">marker</text>
         <text class="hiw-s" x="535" y="191" text-anchor="middle">rubric grading</text>
-        <line x1="145" y1="204" x2="300" y2="244" class="hiw-line" marker-end="url(#ddArrow)"/>
+        <rect x="40" y="226" width="130" height="48" rx="10" class="hiw-box"/>
+        <text class="hiw-t" x="105" y="246" text-anchor="middle">verify</text>
+        <text class="hiw-s" x="105" y="262" text-anchor="middle">fact-check vs context</text>
+        <line x1="145" y1="204" x2="112" y2="224" class="hiw-line" marker-end="url(#ddArrow)"/>
+        <path d="M40 244 L24 244 L24 178 L66 178" class="hiw-line" fill="none" stroke-dasharray="4 3" marker-end="url(#ddArrow)"/>
+        <line x1="170" y1="256" x2="248" y2="270" class="hiw-line" marker-end="url(#ddArrow)"/>
         <line x1="340" y1="204" x2="340" y2="244" class="hiw-line" marker-end="url(#ddArrow)"/>
         <line x1="535" y1="204" x2="380" y2="244" class="hiw-line" marker-end="url(#ddArrow)"/>
         <rect x="250" y="246" width="180" height="52" rx="10" class="hiw-box hiw-violet"/>
         <text class="hiw-t" x="340" y="268" text-anchor="middle">advance</text>
         <text class="hiw-s" x="340" y="285" text-anchor="middle">next step, or finish</text>
-        <path d="M250 272 L150 272 L150 210" class="hiw-line" fill="none" stroke-dasharray="4 3" marker-end="url(#ddArrow)"/>
+        <path d="M430 272 L620 272 L620 84 L424 84" class="hiw-line" fill="none" stroke-dasharray="4 3" marker-end="url(#ddArrow)"/>
       </svg>
-      <p class="dd-cap">The supervisor routes to a worker; each worker returns to "advance", which loops for multi-step plans or ends.</p>
+      <p class="dd-cap">The supervisor routes to a worker. Tutor answers pass through "verify" — an unsupported verdict loops back (dashed) for one bounded revision. Every path converges on "advance", which loops for multi-step plans or ends.</p>
     </div>
     <details class="dd-det"><summary>Deep-dive: what "shared state" actually means</summary><div>
       <p>LangGraph passes one typed dictionary — the state — through every node. A node reads what it needs and returns only the fields it changes; LangGraph merges them. That's how the tutor sees what the supervisor decided without them calling each other directly.</p>
@@ -137,8 +142,8 @@
         <text class="hiw-s" x="91" y="174" text-anchor="middle">sains &middot; ch 1</text>
         <line x1="166" y1="162" x2="192" y2="162" class="hiw-line" marker-end="url(#ddArrow2)"/>
         <rect x="194" y="138" width="170" height="48" rx="9" class="hiw-box"/>
-        <text class="hiw-s" x="279" y="158" text-anchor="middle" style="font-weight:600">filter + similarity</text>
-        <text class="hiw-s" x="279" y="174" text-anchor="middle">top matches by meaning</text>
+        <text class="hiw-s" x="279" y="158" text-anchor="middle" style="font-weight:600">hybrid search</text>
+        <text class="hiw-s" x="279" y="174" text-anchor="middle">meaning + exact terms</text>
         <line x1="364" y1="162" x2="390" y2="162" class="hiw-line" marker-end="url(#ddArrow2)"/>
         <rect x="392" y="138" width="208" height="48" rx="9" class="hiw-box hiw-accent"/>
         <text class="hiw-s" x="496" y="158" text-anchor="middle" style="font-weight:600">6 chunks + source labels</text>
@@ -146,7 +151,9 @@
       </svg>
       <p class="dd-cap">Top row runs when the container image is built; bottom row runs on every question.</p>
     </div>
-    <p>The tutor then gets a strict instruction: <em>answer only from this retrieved context, and cite the section</em>. If retrieval returns nothing relevant, it says so rather than inventing an answer. That single constraint is the difference between a study tool teachers can trust and a confident liar.</p>
+    <p>Retrieval is <strong>hybrid</strong>: two rankers run on every question and their rankings are fused. <em>Vector search</em> matches by meaning ("tiny living things" finds the mikroorganisma chunk even with zero shared words); <em>BM25 keyword search</em> matches exact terms ("Bab 3", "Teorem Pythagoras", vocabulary copied verbatim from a textbook) that embeddings can under-rank. Each covers the other's blind spot. The two rankings are combined with <strong>Reciprocal Rank Fusion</strong> — a chunk's final score is <code class="dd-code">&Sigma; 1/(60+rank)</code> across both lists — which fuses by <em>position</em>, neatly sidestepping the problem that cosine scores (0&ndash;1) and BM25 scores (unbounded) live on incomparable scales.</p>
+    <p>The tutor then gets a strict instruction: <em>answer only from this retrieved context, and cite the section</em>. If retrieval returns nothing relevant, it says so rather than inventing an answer.</p>
+    <p>And the answer isn't just trusted — it's <strong>verified</strong>. A separate fact-checking node re-reads the retrieved context and the tutor's answer and returns a structured verdict: supported, or a list of specific unsupported claims. An unsupported verdict sends those exact claims back to the tutor for <em>one</em> revision ("your previous answer claimed X, which the context doesn't support — rewrite using only facts present"). One revision, never more: the loop is bounded by an attempt counter, and if the verifier itself fails, the answer passes through unchanged — verification improves quality, never availability. This is the generate&rarr;verify&rarr;correct pattern from the corrective-RAG literature, implemented as two graph nodes.</p>
     <details class="dd-det"><summary>Deep-dive: structured output with self-healing</summary><div>
       <p>The quiz and marking agents must return machine-readable JSON matching an exact schema (Pydantic models). Raw LLM output is unreliable, so each structured node validates the response — and on failure retries once with the validation errors fed back as a repair prompt. Contract enforced at the boundary, not hoped for.</p>
       <pre class="dd-pre">result, error = <span class="f">_structured</span>(llm, prompt, QuizSpec)
@@ -154,7 +161,7 @@
 <span class="c"># 3. on failure: retry once with the errors in a repair prompt</span>
 <span class="c"># 4. still invalid: degrade gracefully, never crash</span></pre>
     </div></details>
-    <p class="dd-src">In the code: <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/rag/ingest.py" target="_blank" rel="noreferrer">ai-service/app/rag/ingest.py</a> &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/rag/retriever.py" target="_blank" rel="noreferrer">ai-service/app/rag/retriever.py</a> &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/schemas/quiz.py" target="_blank" rel="noreferrer">ai-service/app/schemas/quiz.py</a></p>
+    <p class="dd-src">In the code: <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/rag/ingest.py" target="_blank" rel="noreferrer">ai-service/app/rag/ingest.py</a> &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/rag/retriever.py" target="_blank" rel="noreferrer">ai-service/app/rag/retriever.py</a> &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/rag/keyword.py" target="_blank" rel="noreferrer">ai-service/app/rag/keyword.py</a> (BM25) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/schemas/quiz.py" target="_blank" rel="noreferrer">ai-service/app/schemas/quiz.py</a></p>
   </section>
 
   <section class="detail-section dd">
@@ -339,8 +346,9 @@
     <div class="dd-skillgrid">
       <div class="dd-skill"><h4>LLM API integration</h4><p>Multi-model router with fallback + exponential-backoff cooldown across Groq-hosted Llama models.</p><a href="${GH}ai-service/app/llm/router.py" target="_blank" rel="noreferrer">app/llm/router.py</a></div>
       <div class="dd-skill"><h4>Prompt engineering</h4><p>Role-scoped system prompts: grounding constraints, citation requirements, JSON-only contracts, repair prompts.</p><a href="${GH}ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">app/graph/nodes.py</a></div>
-      <div class="dd-skill"><h4>RAG</h4><p>Markdown-aware chunking, embeddings, cosine retrieval with metadata filters and graceful filter relaxation.</p><a href="${GH}ai-service/app/rag" target="_blank" rel="noreferrer">app/rag/</a></div>
+      <div class="dd-skill"><h4>Hybrid RAG</h4><p>Markdown-aware chunking; BM25 keyword + vector retrieval fused by reciprocal rank (RRF), metadata-filtered, with graceful filter relaxation.</p><a href="${GH}ai-service/app/rag" target="_blank" rel="noreferrer">app/rag/</a></div>
       <div class="dd-skill"><h4>Agent orchestration</h4><p>LangGraph supervisor: intent classification, task decomposition into plans, conditional routing, execution loop.</p><a href="${GH}ai-service/app/graph" target="_blank" rel="noreferrer">app/graph/</a></div>
+      <div class="dd-skill"><h4>Answer verification</h4><p>Fact-checking node judges tutor answers against retrieved context; unsupported claims drive one bounded self-correction. Fails open.</p><a href="${GH}ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">app/graph/nodes.py</a></div>
       <div class="dd-skill"><h4>Structured output</h4><p>Pydantic-validated agent responses with a one-shot self-repair retry before graceful degradation.</p><a href="${GH}ai-service/app/schemas/quiz.py" target="_blank" rel="noreferrer">app/schemas/quiz.py</a></div>
       <div class="dd-skill"><h4>LLM evaluation</h4><p>Golden datasets + metric functions; CI smoke against a scripted model, real-model runs locally; optional LangSmith tracing.</p><a href="${GH}ai-service/evals" target="_blank" rel="noreferrer">evals/</a></div>
       <div class="dd-skill"><h4>Testing</h4><p>31 pytest tests: unit, graph integration with fakes, API-level, auth behaviour, and regression tests pinning fixed bugs.</p><a href="${GH}ai-service/tests" target="_blank" rel="noreferrer">tests/</a></div>
