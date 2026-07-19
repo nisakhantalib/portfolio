@@ -115,6 +115,40 @@
   </section>
 
   <section class="detail-section dd">
+    <h2>Multimodal input &mdash; photograph a handwritten answer to mark it</h2>
+    <p>SPM answers are written by hand on paper. So the student can snap a photo instead of retyping: a <strong>vision model</strong> reads the handwriting, and the existing marker grades the text. The design principle is <em>convert at the boundary</em> &mdash; one node turns pixels into text, and everything downstream (retrieval, marking, verification) runs unchanged because by then it is just text.</p>
+    <div class="dd-fig">
+      <svg viewBox="0 0 680 250" role="img" aria-label="Image to transcription to marking flow">${AR2}
+        <rect x="16" y="40" width="120" height="60" rx="10" class="hiw-box"/>
+        <text class="hiw-s" x="76" y="64" text-anchor="middle" style="font-weight:600">photo</text>
+        <text class="hiw-s" x="76" y="80" text-anchor="middle">handwritten</text>
+        <text class="hiw-s" x="76" y="94" text-anchor="middle">answer</text>
+        <line x1="136" y1="70" x2="172" y2="70" class="hiw-line" marker-end="url(#ddArrow2)"/>
+        <rect x="174" y="40" width="150" height="60" rx="10" class="hiw-box hiw-violet"/>
+        <text class="hiw-t" x="249" y="62" text-anchor="middle">transcribe</text>
+        <text class="hiw-s" x="249" y="79" text-anchor="middle">vision model reads it</text>
+        <text class="hiw-s" x="249" y="93" text-anchor="middle">pixels &rarr; text</text>
+        <line x1="324" y1="70" x2="360" y2="70" class="hiw-line" marker-end="url(#ddArrow2)"/>
+        <rect x="362" y="40" width="150" height="60" rx="10" class="hiw-box hiw-accent"/>
+        <text class="hiw-s" x="437" y="60" text-anchor="middle" style="font-weight:600">transcription</text>
+        <text class="hiw-s" x="437" y="76" text-anchor="middle">shown to student</text>
+        <text class="hiw-s" x="437" y="90" text-anchor="middle">to catch a misread</text>
+        <line x1="512" y1="70" x2="548" y2="70" class="hiw-line" marker-end="url(#ddArrow2)"/>
+        <rect x="550" y="40" width="114" height="60" rx="10" class="hiw-box"/>
+        <text class="hiw-t" x="607" y="66" text-anchor="middle">marker</text>
+        <text class="hiw-s" x="607" y="82" text-anchor="middle">(unchanged)</text>
+        <text class="hiw-mono" x="16" y="150">the whole existing pipeline &mdash; retrieval, marking, verification &mdash; is untouched</text>
+        <rect x="174" y="162" width="338" height="48" rx="9" class="hiw-region"/>
+        <text class="hiw-s" x="343" y="182" text-anchor="middle">by the time these run, the answer is text &mdash;</text>
+        <text class="hiw-s" x="343" y="198" text-anchor="middle">so nothing downstream had to change</text>
+      </svg>
+      <p class="dd-cap">One transcribe node is the only addition; two-stage (transcribe, then mark) keeps the transcription inspectable and separately testable.</p>
+    </div>
+    <p>Two engineering details worth noting. First, in the model router <strong>vision is a hard constraint, not a preference</strong>: a text-only model physically cannot read an image, so the router must never fall through to one (and never promotes a plain text request up into a pricier vision model either). Second, it <strong>fails open</strong> end to end &mdash; no image is a no-op, and an oversized or unreadable image, or a vision-model outage, simply proceeds on whatever text was typed rather than erroring. The two-stage split (transcribe, <em>then</em> mark) also means transcription accuracy and marking accuracy can be evaluated separately.</p>
+    <p class="dd-src">In the code: <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">app/graph/nodes.py</a> (transcribe_node) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/llm/router.py" target="_blank" rel="noreferrer">app/llm/router.py</a> (vision tier) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/tests/test_multimodal.py" target="_blank" rel="noreferrer">tests/test_multimodal.py</a></p>
+  </section>
+
+  <section class="detail-section dd">
     <h2>Layer 4 &mdash; retrieval: why answers don't hallucinate</h2>
     <p>Before any agent answers, a retrieve step runs — the RAG (Retrieval-Augmented Generation) pipeline. The curriculum becomes searchable once at build time; every question then searches it by meaning.</p>
     <div class="dd-fig">
@@ -350,13 +384,14 @@
       <div class="dd-skill"><h4>Agent orchestration</h4><p>LangGraph supervisor: intent classification, task decomposition into plans, conditional routing, execution loop.</p><a href="${GH}ai-service/app/graph" target="_blank" rel="noreferrer">app/graph/</a></div>
       <div class="dd-skill"><h4>Answer verification</h4><p>Fact-checking node judges tutor answers against retrieved context; unsupported claims drive one bounded self-correction. Fails open.</p><a href="${GH}ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">app/graph/nodes.py</a></div>
       <div class="dd-skill"><h4>Adaptive output</h4><p>Presenter agent emits schema-validated render instructions - Mermaid diagram, table, or slides - when a visual aids the answer. Cost-gated, fails open to text.</p><a href="${GH}ai-service/app/schemas/visual.py" target="_blank" rel="noreferrer">app/schemas/visual.py</a></div>
+      <div class="dd-skill"><h4>Multimodal (vision)</h4><p>A photographed handwritten answer is transcribed by a vision model (hard-constrained routing) then marked by the existing pipeline. Two-stage, fails open.</p><a href="${GH}ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">app/graph/nodes.py</a></div>
       <div class="dd-skill"><h4>Structured output</h4><p>Pydantic-validated agent responses with a one-shot self-repair retry before graceful degradation.</p><a href="${GH}ai-service/app/schemas/quiz.py" target="_blank" rel="noreferrer">app/schemas/quiz.py</a></div>
       <div class="dd-skill"><h4>LLM evaluation</h4><p>Golden datasets + metric functions; CI smoke against a scripted model, real-model runs locally; optional LangSmith tracing.</p><a href="${GH}ai-service/evals" target="_blank" rel="noreferrer">evals/</a></div>
       <div class="dd-skill"><h4>Testing</h4><p>31 pytest tests: unit, graph integration with fakes, API-level, auth behaviour, and regression tests pinning fixed bugs.</p><a href="${GH}ai-service/tests" target="_blank" rel="noreferrer">tests/</a></div>
       <div class="dd-skill"><h4>Deployment / AI infra</h4><p>Multi-stage Docker, GitHub Actions CI/CD with OIDC (no stored cloud secrets), Azure Container Apps with scale-to-zero.</p><a href="${GH}.github/workflows/deploy.yml" target="_blank" rel="noreferrer">deploy.yml</a> &middot; <a href="${GH}ai-service/Dockerfile" target="_blank" rel="noreferrer">Dockerfile</a></div>
       <div class="dd-skill"><h4>Security</h4><p>Server-side secret handling, API-key auth on /v1 routes, CORS allow-listing, secrets in Azure's encrypted store.</p><a href="${GH}ai-service/app/security.py" target="_blank" rel="noreferrer">app/security.py</a></div>
     </div>
-    <p class="dd-notcovered"><strong>Not covered by this project</strong> (stated plainly rather than implied): model fine-tuning and multimodal <em>input</em> (vision/audio) &mdash; the agent adapts its <em>output</em> representation (prose/diagram/table/slides) but does not yet read images or audio. Classical model training &mdash; BERT and Bi-LSTM in PyTorch &mdash; is demonstrated separately in the <a href="project.html?id=evidence">Evidence Detection</a> project.</p>
+    <p class="dd-notcovered"><strong>Not covered by this project</strong> (stated plainly rather than implied): model fine-tuning and <em>audio</em> input. Vision input is covered (photographed handwritten answers are transcribed and marked); speech is the same boundary-conversion pattern and would be the natural next addition. Classical model training &mdash; BERT and Bi-LSTM in PyTorch &mdash; is demonstrated separately in the <a href="project.html?id=evidence">Evidence Detection</a> project.</p>
   </section>`;
   bugSec.insertAdjacentHTML("afterend", liveHtml);
 
