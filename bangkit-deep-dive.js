@@ -429,6 +429,59 @@
     <p><strong>Why plan-and-execute here:</strong> a tutoring service has enumerable intents (tutor / quiz / mark) and real latency and cost budgets. Planning once &mdash; the supervisor decomposes the request into an ordered plan, then the graph executes it &mdash; means a predictable number of LLM calls per request, deterministic routing that 60+ tests can pin down, and evals that don't have to reason about open-ended loops. ReAct's model-decides-every-step loop earns its extra cost when the steps <em>can't</em> be enumerated upfront (open-ended research, general assistants) &mdash; which this product isn't.</p>
     <p><strong>Where the studied patterns did shape this codebase:</strong> the verification node is the corrective-RAG idea from the reflection family, deliberately bounded to a single revision (availability beats perfection in a service); studying a reference multi-agent RAG architecture (DocChat) is what surfaced the hybrid-retrieval and verification gaps that became Milestone 8. And the honest line: full Reflexion &mdash; critique <em>generating new retrieval queries</em> across multiple rounds with accumulated history &mdash; is studied but not shipped; the natural home for it would be iteratively refining generated quiz questions.</p>
     <p class="dd-src">In the code: <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/supervisor.py" target="_blank" rel="noreferrer">supervisor.py</a> (plan-and-execute) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/build.py" target="_blank" rel="noreferrer">build.py</a> (the loop) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">nodes.py</a> (bounded verification)</p>
+    <details class="dd-det"><summary>Study notes: the five materials, with code (collapsed appendix)</summary><div>
+      <p style="font-size:0.85rem"><em>Condensed notes from the hands-on labs behind the comparison above (LangGraph, reflection, Reflexion, ReAct, and a reference multi-agent RAG build). Code shown is from the lab materials; the "in this repo" lines are where each idea lives here.</em></p>
+
+      <h4 style="margin:1rem 0 0.3rem">1 &middot; LangGraph mechanics</h4>
+      <p style="font-size:0.85rem">Four primitives: a TypedDict <strong>state</strong> flowing through the graph, <strong>nodes</strong> (state in, changes out), fixed <strong>edges</strong>, and <strong>routers</strong> returning the next node's name.</p>
+      <pre class="dd-pre"><span class="k">def</span> <span class="f">router</span>(state):
+    <span class="k">if</span> state[<span class="s">'is_authenticated'</span>]: <span class="k">return</span> <span class="s">"success_node"</span>
+    <span class="k">return</span> <span class="s">"failure_node"</span>
+
+workflow.add_conditional_edges(<span class="s">"ValidateCredential"</span>, router, {...})
+app = workflow.compile()</pre>
+      <p class="dd-src">In this repo: state.py, build.py, _dispatch() &mdash; same contract, plus dependency injection the labs don't teach.</p>
+
+      <h4 style="margin:1rem 0 0.3rem">2 &middot; Reflection: generate &rarr; critique &rarr; loop</h4>
+      <p style="font-size:0.85rem">Two roles alternate over a message list; the critique returns <em>as a HumanMessage</em> so the generator experiences it as a user asking for changes. Weakness: stopping on a magic message count.</p>
+      <pre class="dd-pre"><span class="k">def</span> <span class="f">reflection_node</span>(messages):
+    res = reflect_chain.invoke({<span class="s">"messages"</span>: messages})
+    <span class="k">return</span> [HumanMessage(content=res.content)]  <span class="c"># critique disguised as user</span>
+
+<span class="k">def</span> <span class="f">should_continue</span>(state):
+    <span class="k">if</span> len(state) > 6: <span class="k">return</span> END   <span class="c"># magic number — the weakness</span>
+    <span class="k">return</span> <span class="s">"reflect"</span></pre>
+      <p class="dd-src">In this repo: the family idea became verify_node &mdash; structured verdict, bounded to one revision.</p>
+
+      <h4 style="margin:1rem 0 0.3rem">3 &middot; Reflexion: critique drives new retrieval</h4>
+      <p style="font-size:0.85rem">Two upgrades: the critique is schema-forced and must name <em>search queries</em> (what to go fetch), and stopping counts real tool calls instead of messages. A revisor then rewrites with mandatory references.</p>
+      <pre class="dd-pre"><span class="k">class</span> <span class="f">AnswerQuestion</span>(BaseModel):
+    answer: str
+    reflection: Reflection          <span class="c"># {missing, superfluous}</span>
+    search_queries: List[str]       <span class="c"># critique DRIVES retrieval</span>
+
+<span class="k">def</span> <span class="f">event_loop</span>(state):
+    n = sum(isinstance(m, ToolMessage) <span class="k">for</span> m <span class="k">in</span> state)
+    <span class="k">return</span> END <span class="k">if</span> n >= MAX_ITERATIONS <span class="k">else</span> <span class="s">"execute_tools"</span></pre>
+      <p class="dd-src">In this repo: studied, not shipped &mdash; natural home would be iterative quiz refinement against the vector store.</p>
+
+      <h4 style="margin:1rem 0 0.3rem">4 &middot; ReAct: the model decides every step</h4>
+      <p style="font-size:0.85rem">A two-node cycle, agent &harr; tools. The model ends its own loop by simply not asking for a tool. Any docstringed function becomes a capability.</p>
+      <pre class="dd-pre"><span class="k">def</span> <span class="f">should_continue</span>(state):
+    <span class="k">if not</span> state[<span class="s">"messages"</span>][-1].tool_calls: <span class="k">return</span> <span class="s">"end"</span>
+    <span class="k">return</span> <span class="s">"continue"</span>
+
+workflow.add_edge(<span class="s">"tools"</span>, <span class="s">"agent"</span>)   <span class="c"># tools always return to agent</span></pre>
+      <p class="dd-src">In this repo: deliberately not the core architecture (see above); the scoped use-case is a calculator tool inside marking.</p>
+
+      <h4 style="margin:1rem 0 0.3rem">5 &middot; Reference multi-agent RAG (DocChat)</h4>
+      <p style="font-size:0.85rem">Three keepers: a relevance gate before generation (CAN_ANSWER / PARTIAL / NO_MATCH), hybrid BM25+vector retrieval, and a verification agent whose failing verdict routes back to re-research.</p>
+      <pre class="dd-pre"><span class="k">def</span> <span class="f">_decide_next_step</span>(self, state):
+    <span class="k">if</span> <span class="s">"Supported: NO"</span> <span class="k">in</span> state[<span class="s">"verification_report"</span>]:
+        <span class="k">return</span> <span class="s">"re_research"</span>
+    <span class="k">return</span> <span class="s">"end"</span></pre>
+      <p class="dd-src">In this repo: the study that produced Milestone 8 &mdash; hybrid retrieval (keyword.py + RRF) and verify_node. The relevance gate remains unimplemented.</p>
+    </div></details>
   </section>
 
   <section class="detail-section dd">
