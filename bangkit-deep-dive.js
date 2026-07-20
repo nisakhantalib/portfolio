@@ -429,6 +429,7 @@
     <p><strong>Why plan-and-execute here:</strong> a tutoring service has enumerable intents (tutor / quiz / mark) and real latency and cost budgets. Planning once &mdash; the supervisor decomposes the request into an ordered plan, then the graph executes it &mdash; means a predictable number of LLM calls per request, deterministic routing that 60+ tests can pin down, and evals that don't have to reason about open-ended loops. ReAct's model-decides-every-step loop earns its extra cost when the steps <em>can't</em> be enumerated upfront (open-ended research, general assistants) &mdash; which this product isn't.</p>
     <p><strong>Where the studied patterns did shape this codebase:</strong> the verification node is the corrective-RAG idea from the reflection family, deliberately bounded to a single revision (availability beats perfection in a service); studying a reference multi-agent RAG architecture (DocChat) is what surfaced the hybrid-retrieval and verification gaps that became Milestone 8. And the honest line: full Reflexion &mdash; critique <em>generating new retrieval queries</em> across multiple rounds with accumulated history &mdash; is studied but not shipped; the natural home for it would be iteratively refining generated quiz questions.</p>
     <p class="dd-src">In the code: <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/supervisor.py" target="_blank" rel="noreferrer">supervisor.py</a> (plan-and-execute) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/build.py" target="_blank" rel="noreferrer">build.py</a> (the loop) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">nodes.py</a> (bounded verification)</p>
+    <p class="dd-src">Full write-up: <a href="agentic-study-notes.html" target="_blank" rel="noreferrer">Agentic AI study reference &mdash; all five materials, code + mappings &rarr;</a></p>
     <details class="dd-det"><summary>Study notes: the five materials, with code (collapsed appendix)</summary><div>
       <p style="font-size:0.85rem"><em>Condensed notes from the hands-on labs behind the comparison above (LangGraph, reflection, Reflexion, ReAct, and a reference multi-agent RAG build). Code shown is from the lab materials; the "in this repo" lines are where each idea lives here.</em></p>
 
@@ -481,6 +482,7 @@ workflow.add_edge(<span class="s">"tools"</span>, <span class="s">"agent"</span>
         <span class="k">return</span> <span class="s">"re_research"</span>
     <span class="k">return</span> <span class="s">"end"</span></pre>
       <p class="dd-src">In this repo: the study that produced Milestone 8 &mdash; hybrid retrieval (keyword.py + RRF) and verify_node. The relevance gate remains unimplemented.</p>
+      <p class="dd-src" style="margin-top:0.8rem">Full version with complete code and comparison table: <a href="agentic-study-notes.html" target="_blank" rel="noreferrer">open the study reference &rarr;</a></p>
     </div></details>
   </section>
 

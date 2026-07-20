@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agentic AI Study Reference — All Notebooks Compiled</title>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--line:#2b333d;--ink:#e6edf3;--soft:#9aa7b4;--mute:#606b78;
+        --grn:#3fb98a;--blu:#58a6ff;--amb:#d29922;--vio:#a371f7;--red:#e0603a;--mono:ui-monospace,"SF Mono",Menlo,monospace}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 -apple-system,"Segoe UI",sans-serif}
+  .wrap{max-width:940px;margin:0 auto;padding:0 22px 90px}
+  h1{font-size:27px;margin:40px 0 6px} .sub{color:var(--soft);margin:0 0 10px}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:20px 0;font-size:13.5px}
+  .toc a{color:var(--blu);text-decoration:none;display:block;padding:2px 0}
+  h2{font-size:21px;margin:52px 0 8px;padding-top:22px;border-top:1px solid var(--line)}
+  h2 .n{font-family:var(--mono);color:var(--grn);font-size:13px;margin-right:8px}
+  h2 .src{font-family:var(--mono);font-size:11px;color:var(--mute);font-weight:400;display:block;margin-top:2px}
+  h3{font-size:15.5px;margin:24px 0 6px;color:var(--ink)}
+  p{color:var(--soft)} strong{color:var(--ink)}
+  svg{width:100%;height:auto;display:block;margin:12px 0}
+  .cap{font-family:var(--mono);font-size:11px;color:var(--mute);text-align:center;margin:-4px 0 16px}
+  pre{background:#0a0e13;border:1px solid var(--line);border-radius:8px;padding:13px 15px;overflow-x:auto;
+      font-family:var(--mono);font-size:12.5px;line-height:1.6;color:#c9d5e0;margin:12px 0}
+  pre .c{color:#5a6673} pre .k{color:#a371f7} pre .s{color:#3fb98a}
+  code{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--grn)}
+  .map{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--grn);border-radius:8px;padding:11px 15px;margin:12px 0;font-size:13.5px;color:var(--soft)}
+  .map b{color:var(--grn)}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+  th{text-align:left;font-family:var(--mono);font-size:10.5px;color:var(--mute);text-transform:uppercase;padding:7px 9px;border-bottom:1px solid var(--line)}
+  td{padding:8px 9px;border-bottom:1px solid #1d242d;color:var(--soft);vertical-align:top}
+  td:first-child{color:var(--ink);white-space:nowrap}
+</style>
+</head>
+<body><div class="wrap">
+
+<p style="margin:28px 0 -22px"><a href="project.html?id=bangkit" style="color:#58a6ff;text-decoration:none;font-size:13.5px">&larr; Back to the Bangkit project</a></p>
+<h1>Agentic AI Study Reference</h1>
+<p class="sub">All five learning materials compiled: the core mechanism, the actual code, and where each maps to bangkit-agentic. For your own reference — the code blocks are verbatim from the notebooks.</p>
+<div class="toc">
+  <a href="#lg">01 — LangGraph 101: the raw mechanics (state, nodes, edges, routers)</a>
+  <a href="#rf">02 — Reflection agent: generate → critique → loop</a>
+  <a href="#rx">03 — Reflexion agent: critique drives new retrieval, with citations</a>
+  <a href="#ra">04 — ReAct: the model decides every step</a>
+  <a href="#dc">05 — DocChat lab: verify-and-correct RAG + hybrid retrieval</a>
+  <a href="#cmp">06 — Cross-comparison + bangkit mapping (the one table to remember)</a>
+</div>
+
+<h2 id="lg"><span class="n">01</span>LangGraph 101 — the raw mechanics<span class="src">source: LangGraph101-v1.ipynb (148 cells)</span></h2>
+<p>Everything else builds on four primitives: a <strong>state</strong> (TypedDict) that flows through the graph, <strong>nodes</strong> (functions taking state, returning changes), <strong>edges</strong> (fixed transitions), and <strong>routers</strong> (functions returning the <em>name</em> of the next node).</p>
+<pre><span class="c"># The state — a TypedDict every node reads and updates</span>
+<span class="k">class</span> AuthState(TypedDict):
+    username: Optional[str]
+    password: Optional[str]
+    is_authenticated: Optional[bool]
+    output: Optional[str]
+
+<span class="c"># A router — reads state, returns the NAME of the next node</span>
+<span class="k">def</span> router(state):
+    <span class="k">if</span> state[<span class="s">'is_authenticated'</span>]:
+        <span class="k">return</span> <span class="s">"success_node"</span>
+    <span class="k">else</span>:
+        <span class="k">return</span> <span class="s">"failure_node"</span>
+
+<span class="c"># Assembly — the six calls that build every graph</span>
+workflow.add_conditional_edges(<span class="s">"ValidateCredential"</span>, router,
+    {<span class="s">"success_node"</span>: <span class="s">"Success"</span>, <span class="s">"failure_node"</span>: <span class="s">"Failure"</span>})
+workflow.set_entry_point(<span class="s">"InputNode"</span>)
+app = workflow.compile()</pre>
+<p>The notebook's second example (QAState: <code>question → context → answer</code>) is the important one — validate input, <strong>fetch context, answer from that context</strong>: RAG's shape, minus the actual retrieval.</p>
+<div class="map"><b>Maps to bangkit:</b> <code>app/graph/state.py</code> (TutorState is this, richer), <code>app/graph/build.py</code> (same six assembly calls), <code>_dispatch()</code> (same router contract, but routing on an LLM-generated plan instead of if/else). One thing bangkit adds the notebook doesn't teach: nodes take <code>(state, deps)</code> — dependency injection, which is why the tests can swap in fakes.</div>
+
+<h2 id="rf"><span class="n">02</span>Reflection agent — generate → critique → loop<span class="src">source: Tweet-Reflection-Agent-v1.ipynb (81 cells)</span></h2>
+<p>Two LLM roles alternate over a shared message list: a <strong>generator</strong> produces (a LinkedIn post), a <strong>reflector</strong> critiques it. The trick that makes the loop work: the critique is returned <em>as a HumanMessage</em>, so the generator experiences it as a user asking for changes.</p>
+<pre><span class="k">def</span> generation_node(state: Sequence[BaseMessage]) -> List[BaseMessage]:
+    generated_post = generate_chain.invoke({<span class="s">"messages"</span>: state})
+    <span class="k">return</span> [AIMessage(content=generated_post.content)]
+
+<span class="k">def</span> reflection_node(messages: Sequence[BaseMessage]) -> List[BaseMessage]:
+    res = reflect_chain.invoke({<span class="s">"messages"</span>: messages})
+    <span class="k">return</span> [HumanMessage(content=res.content)]   <span class="c"># critique disguised as the user</span>
+
+<span class="c"># stopping condition: crude — message count</span>
+<span class="k">def</span> should_continue(state: List[BaseMessage]):
+    <span class="k">if</span> len(state) > 6:
+        <span class="k">return</span> END
+    <span class="k">return</span> <span class="s">"reflect"</span></pre>
+<p>Uses <code>MessageGraph</code> (state = a list of messages) rather than a TypedDict — fine for chat-shaped loops, limiting when you need structured fields.</p>
+<div class="map"><b>Maps to bangkit:</b> not implemented as a loop. The <em>family idea</em> — critique the output before trusting it — became <code>verify_node</code>, but bounded to one revision and with a structured verdict instead of free-text critique. The magic-number stopping condition (<code>len > 6</code>) is the weakness to remember; Reflexion fixes it.</div>
+
+<h2 id="rx"><span class="n">03</span>Reflexion — critique drives new retrieval, with citations<span class="src">source: Reflexion_Agent-v1.ipynb (66 cells)</span></h2>
+<p>Reflection's upgrade, in two moves. First, the critique is <strong>forced into a schema</strong> — and crucially it must produce <em>search queries</em>, so the critique states not just what's wrong but what to go look up:</p>
+<pre><span class="k">class</span> Reflection(BaseModel):
+    missing: str = Field(description=<span class="s">"What information is missing"</span>)
+    superfluous: str = Field(description=<span class="s">"What information is unnecessary"</span>)
+
+<span class="k">class</span> AnswerQuestion(BaseModel):
+    answer: str
+    reflection: Reflection                <span class="c"># structured self-critique</span>
+    search_queries: List[str]             <span class="c"># the critique DRIVES retrieval</span>
+
+<span class="k">class</span> ReviseAnswer(AnswerQuestion):
+    references: List[str] = Field(description=<span class="s">"Citations motivating your updated answer."</span>)</pre>
+<p>Second, those queries are actually executed, results accumulate in a <code>response_list</code>, and a <strong>revisor</strong> rewrites the answer with a mandatory references section:</p>
+<pre><span class="k">def</span> execute_tools(state: List[BaseMessage]) -> List[BaseMessage]:
+    last_ai_message = state[-1]
+    <span class="k">for</span> tool_call <span class="k">in</span> last_ai_message.tool_calls:
+        search_queries = tool_call[<span class="s">"args"</span>].get(<span class="s">"search_queries"</span>, [])
+        <span class="k">for</span> query <span class="k">in</span> search_queries:
+            result = tavily_tool.invoke(query)      <span class="c"># live web search per query</span>
+        ...append ToolMessage(json.dumps(query_results))...
+
+<span class="c"># stopping condition: counts REAL WORK (tool calls), not raw messages</span>
+<span class="k">def</span> event_loop(state: List[BaseMessage]) -> str:
+    num_iterations = sum(isinstance(item, ToolMessage) <span class="k">for</span> item <span class="k">in</span> state)
+    <span class="k">if</span> num_iterations >= MAX_ITERATIONS:
+        <span class="k">return</span> END
+    <span class="k">return</span> <span class="s">"execute_tools"</span></pre>
+<div class="map"><b>Maps to bangkit:</b> studied, not shipped. <code>verify_node</code> is the same corrective family but retrieval-free (checks against context already retrieved) and single-round. Full Reflexion for bangkit would mean: critique generates a query → re-retrieve from <em>your vector store</em> (not the web) → revise → 2–3 bounded rounds. Natural home: iterative quiz-question refinement.</div>
+
+<h2 id="ra"><span class="n">04</span>ReAct — the model decides every step<span class="src">source: ReAct-v1.ipynb (75 cells)</span></h2>
+<p>A tight two-node cycle: <code>agent ⇄ tools</code>. The model reasons; if it emits <code>tool_calls</code>, they run and results loop back; the moment it answers without asking for a tool, the loop ends. <strong>The LLM itself decides when it's done</strong> — no plan, no iteration cap in the core pattern.</p>
+<pre><span class="c"># Tools are just decorated functions — the docstring is the model's manual</span>
+<span class="k">@tool</span>
+<span class="k">def</span> search_tool(query: str):
+    <span class="s">"""Search the web for information using Tavily API."""</span>
+    <span class="k">return</span> search.invoke(query)
+
+model_react = chat_prompt | model.bind_tools(tools)
+
+<span class="k">def</span> should_continue(state: AgentState):
+    last_message = state[<span class="s">"messages"</span>][-1]
+    <span class="k">if not</span> last_message.tool_calls:
+        <span class="k">return</span> <span class="s">"end"</span>        <span class="c"># model didn't ask for a tool -> done</span>
+    <span class="k">return</span> <span class="s">"continue"</span>       <span class="c"># model asked -> run it, loop back</span>
+
+workflow.add_node(<span class="s">"agent"</span>, call_model)
+workflow.add_node(<span class="s">"tools"</span>, tool_node)
+workflow.add_edge(<span class="s">"tools"</span>, <span class="s">"agent"</span>)        <span class="c"># tools ALWAYS return to agent</span>
+workflow.add_conditional_edges(<span class="s">"agent"</span>, should_continue,
+    {<span class="s">"continue"</span>: <span class="s">"tools"</span>, <span class="s">"end"</span>: END})</pre>
+<p>The notebook's exercises (calculator tool, news summarizer) are the practical takeaway: any function with a good docstring becomes a capability the model can choose to invoke.</p>
+<div class="map"><b>Maps to bangkit:</b> deliberately NOT the architecture — bangkit is plan-and-execute (supervisor plans once; predictable cost, testable routing). But the calculator exercise is exactly the mechanism a "verify arithmetic instead of trusting the LLM" feature would use — the scoped, justified place for a ReAct-style tool node inside the existing graph.</div>
+
+<h2 id="dc"><span class="n">05</span>DocChat lab — verify-and-correct RAG + hybrid retrieval<span class="src">source: lab-instructions.md (full multi-agent RAG project)</span></h2>
+<p>A complete production-shaped app: upload documents, ask questions, get verified answers. Three ideas worth keeping:</p>
+<h3>1. Relevance gate before answering</h3>
+<pre><span class="c"># RelevanceChecker classifies BEFORE any generation happens:</span>
+<span class="c"># "CAN_ANSWER"  — passages fully answer the question</span>
+<span class="c"># "PARTIAL"     — some relevant info, incomplete</span>
+<span class="c"># "NO_MATCH"    — don't attempt an answer</span></pre>
+<h3>2. Hybrid retrieval</h3>
+<pre><span class="k">from</span> langchain.retrievers <span class="k">import</span> EnsembleRetriever
+<span class="c"># BM25 (exact terms) + vector search (meaning), weighted combination</span></pre>
+<h3>3. Verification agent driving re-research</h3>
+<pre><span class="k">def</span> _decide_next_step(self, state: AgentState) -> str:
+    <span class="k">if</span> <span class="s">"Supported: NO"</span> <span class="k">in</span> state[<span class="s">"verification_report"</span>] ...:
+        <span class="k">return</span> <span class="s">"re_research"</span>     <span class="c"># draft not supported -> retrieve again</span>
+    <span class="k">return</span> <span class="s">"end"</span></pre>
+<div class="map"><b>Maps to bangkit — the most consequential study:</b> this is what directly produced <b>Milestone 8</b>. Hybrid retrieval → your <code>app/rag/keyword.py</code> (BM25 built dependency-free) + RRF fusion in <code>retriever.py</code>. The verification agent → your <code>verify_node</code>, simplified to one bounded revision. The relevance gate has a partial cousin in your retriever's filter-relaxation; a full CAN_ANSWER/PARTIAL/NO_MATCH gate remains unimplemented.</div>
+
+<h2 id="cmp"><span class="n">06</span>Cross-comparison — the one table to remember</h2>
+<table>
+<tr><th>Pattern</th><th>Who decides the next step</th><th>Stopping condition</th><th>Extra retrieval mid-loop?</th><th>In bangkit</th></tr>
+<tr><td>LangGraph basics</td><td>Fixed if/else router</td><td>Graph reaches END</td><td>—</td><td>Shipped — the foundation of app/graph/</td></tr>
+<tr><td>Plan-and-execute</td><td>Supervisor LLM, ONCE, upfront</td><td>Plan list empties</td><td>No (retrieval is a planned step)</td><td>Shipped — the core architecture</td></tr>
+<tr><td>Reflection</td><td>Alternating generate/critique roles</td><td>Magic number (msg count)</td><td>No</td><td>Family idea shipped as verify_node (1 bounded round)</td></tr>
+<tr><td>Reflexion</td><td>Critique schema names what to fetch next</td><td>Tool-call count vs MAX_ITERATIONS</td><td><strong>Yes — the defining trait</strong></td><td>Studied; natural home = quiz refinement</td></tr>
+<tr><td>ReAct</td><td>The model, EVERY turn</td><td>Model stops asking for tools</td><td>Yes (any tool, any time)</td><td>Studied; scoped use = calculator tool in marking</td></tr>
+<tr><td>DocChat verify-loop</td><td>Verifier verdict routes re-research</td><td>Verdict = supported</td><td>Yes (re-research on failure)</td><td>Simplified version shipped (verify_node); relevance gate not yet</td></tr>
+</table>
+<p>The compressed version, if you remember one thing: <strong>the patterns differ only in who decides the next step and when.</strong> Fixed router → planner-once → model-every-turn is the spectrum of control; reflection/Reflexion/verification are all the same corrective idea at different levels of structure and tool access.</p>
+
+</div></body></html>
