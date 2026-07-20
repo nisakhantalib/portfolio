@@ -42,6 +42,7 @@
   <a href="#ra">04 — ReAct: the model decides every step</a>
   <a href="#dc">05 — DocChat lab: verify-and-correct RAG + hybrid retrieval</a>
   <a href="#cmp">06 — Cross-comparison + bangkit mapping (the one table to remember)</a>
+  <a href="#cs">07 — Cheat-sheet distillation: the two loops, drawn + when to use which</a>
 </div>
 
 <h2 id="lg"><span class="n">01</span>LangGraph 101 — the raw mechanics<span class="src">source: LangGraph101-v1.ipynb (148 cells)</span></h2>
@@ -168,5 +169,59 @@ workflow.add_conditional_edges(<span class="s">"agent"</span>, should_continue,
 <tr><td>DocChat verify-loop</td><td>Verifier verdict routes re-research</td><td>Verdict = supported</td><td>Yes (re-research on failure)</td><td>Simplified version shipped (verify_node); relevance gate not yet</td></tr>
 </table>
 <p>The compressed version, if you remember one thing: <strong>the patterns differ only in who decides the next step and when.</strong> Fixed router → planner-once → model-every-turn is the spectrum of control; reflection/Reflexion/verification are all the same corrective idea at different levels of structure and tool access.</p>
+
+
+<h2 id="cs"><span class="n">07</span>Cheat-sheet distillation — the two loops, drawn<span class="src">distilled from the course cheat sheet (IBM, "Build Self-Improving Agents with LangGraph") — rewritten and redrawn, not reproduced</span></h2>
+
+<h3>The reflection loop</h3>
+<p>The generator and reflector are the <em>same LLM in two roles</em>. The reflections object (response + critique) feeds straight back into generation — no outside information ever enters the loop, which is exactly why reflection plateaus: it can polish, but it can't learn a fact it doesn't have.</p>
+<svg viewBox="0 0 880 260">
+<defs><marker id="csA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#606b78" stroke-width="1.6"/></marker></defs>
+<style>.cbx{fill:#161b22;stroke:#2b333d}.cbv{fill:#1c1626;stroke:#4a3a6b}.cbp{fill:#221a2b;stroke:#5a3a6b}.ctt{font:600 13px sans-serif;fill:#e6edf3}.css2{font:10.5px ui-monospace,monospace;fill:#9aa7b4}.cl{stroke:#606b78;stroke-width:1.5;fill:none}</style>
+<rect class="cbp" x="20" y="90" width="120" height="50" rx="9"/><text class="ctt" x="80" y="120" text-anchor="middle">User</text>
+<line class="cl" x1="140" y1="100" x2="230" y2="70" marker-end="url(#csA)"/><text class="css2" x="146" y="76">1 · query</text>
+<rect class="cbv" x="232" y="40" width="170" height="52" rx="9"/><text class="ctt" x="317" y="62" text-anchor="middle">LLM — generate</text><text class="css2" x="317" y="80" text-anchor="middle">first attempt</text>
+<line class="cl" x1="402" y1="66" x2="492" y2="66" marker-end="url(#csA)"/><text class="css2" x="428" y="56">2</text>
+<rect class="cbx" x="494" y="40" width="160" height="52" rx="9"/><text class="ctt" x="574" y="62" text-anchor="middle">initial response</text><text class="css2" x="574" y="80" text-anchor="middle">plain text</text>
+<line class="cl" x1="574" y1="92" x2="574" y2="150" marker-end="url(#csA)"/><text class="css2" x="584" y="126">3</text>
+<rect class="cbv" x="494" y="152" width="160" height="52" rx="9"/><text class="ctt" x="574" y="174" text-anchor="middle">LLM — reflect</text><text class="css2" x="574" y="192" text-anchor="middle">teacher role</text>
+<line class="cl" x1="494" y1="178" x2="404" y2="178" marker-end="url(#csA)"/><text class="css2" x="440" y="168">4</text>
+<rect class="cbx" x="240" y="152" width="164" height="52" rx="9"/><text class="ctt" x="322" y="172" text-anchor="middle">reflections</text><text class="css2" x="322" y="190" text-anchor="middle">{response, critique}</text>
+<path class="cl" d="M322 152 C 322 120 317 116 317 94" marker-end="url(#csA)"/><text class="css2" x="330" y="122">5 · loop, repeat N times</text>
+<line class="cl" x1="232" y1="52" x2="140 " y2="110" stroke-dasharray="4 3" marker-end="url(#csA)"/><text class="css2" x="120" y="60">end · respond</text>
+</svg>
+<p class="cap">Internal-only feedback: nothing new enters after step 1 — polish without grounding.</p>
+
+<h3>The Reflexion loop</h3>
+<p>Same shape, two structural additions: the responder's output is a <em>structured object</em> whose critique names <strong>search queries</strong>, and an execute-tools step actually runs them — so every revision cycle injects fresh outside evidence, and the revisor must attach <strong>citations</strong>. This is what turns "improved opinion" into "verifiable claim".</p>
+<svg viewBox="0 0 880 300">
+<defs><marker id="csB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#606b78" stroke-width="1.6"/></marker></defs>
+<style>.dbx{fill:#161b22;stroke:#2b333d}.dbv{fill:#1c1626;stroke:#4a3a6b}.dba{fill:#221d12;stroke:#5c4a1f}.dbp{fill:#221a2b;stroke:#5a3a6b}.dtt{font:600 12.5px sans-serif;fill:#e6edf3}.dss{font:10.5px ui-monospace,monospace;fill:#9aa7b4}.dl{stroke:#606b78;stroke-width:1.5;fill:none}</style>
+<rect class="dbp" x="20" y="120" width="110" height="50" rx="9"/><text class="dtt" x="75" y="150" text-anchor="middle">User</text>
+<line class="dl" x1="130" y1="130" x2="210" y2="66" marker-end="url(#csB)"/><text class="dss" x="132" y="92">1 · query</text>
+<rect class="dbv" x="212" y="34" width="140" height="50" rx="9"/><text class="dtt" x="282" y="64" text-anchor="middle">responder</text>
+<line class="dl" x1="352" y1="59" x2="440" y2="59" marker-end="url(#csB)"/><text class="dss" x="380" y="49">2</text>
+<rect class="dbx" x="442" y="24" width="196" height="70" rx="9"/><text class="dtt" x="540" y="46" text-anchor="middle">initial response</text><text class="dss" x="540" y="64" text-anchor="middle">{response, critique,</text><text class="dss" x="540" y="80" text-anchor="middle">search_queries}</text>
+<line class="dl" x1="638" y1="59" x2="716" y2="100" marker-end="url(#csB)"/>
+<rect class="dba" x="700" y="102" width="160" height="52" rx="9"/><text class="dtt" x="780" y="124" text-anchor="middle">execute tools</text><text class="dss" x="780" y="142" text-anchor="middle">run the queries</text>
+<line class="dl" x1="780" y1="154" x2="700" y2="212" marker-end="url(#csB)"/><text class="dss" x="760" y="190">3 · results</text>
+<rect class="dbv" x="540" y="212" width="150" height="50" rx="9"/><text class="dtt" x="615" y="242" text-anchor="middle">revisor</text>
+<line class="dl" x1="540" y1="237" x2="452" y2="237" marker-end="url(#csB)"/><text class="dss" x="486" y="227">4</text>
+<rect class="dbx" x="250" y="200" width="200" height="86" rx="9"/><text class="dtt" x="350" y="222" text-anchor="middle">revised response</text><text class="dss" x="350" y="240" text-anchor="middle">{response, critique,</text><text class="dss" x="350" y="256" text-anchor="middle">search_queries,</text><text class="dss" x="350" y="272" text-anchor="middle">citations}</text>
+<path class="dl" d="M450 214 C 560 170 680 168 738 156" stroke-dasharray="4 3" marker-end="url(#csB)"/><text class="dss" x="500" y="176">loop · repeat N times</text>
+<line class="dl" x1="250" y1="250" x2="132 " y2="160" stroke-dasharray="4 3" marker-end="url(#csB)"/><text class="dss" x="130" y="212">5 · respond</text>
+</svg>
+<p class="cap">External grounding every cycle: the critique names what to fetch; the revision must cite what came back.</p>
+
+<h3>When to use which — the decision rules, in my own words</h3>
+<table>
+<tr><th>Aspect</th><th>Reflection</th><th>Reflexion</th><th>ReAct</th></tr>
+<tr><td>Feedback source</td><td>The model itself (self-review)</td><td>Tools/search + self-review</td><td>Tool results, chosen turn by turn</td></tr>
+<tr><td>Graph shape</td><td>2 nodes: generate ⇄ reflect</td><td>3+ nodes: draft → tools → revise, looped</td><td>2 nodes: think ⇄ act, conditional exit</td></tr>
+<tr><td>Best for</td><td>Open-ended drafting where polish matters (essays, explanations)</td><td>Anything where factual correctness and evidence matter (QA with citations, research, code checking)</td><td>Tasks needing live tool use or multi-step plans against APIs/data</td></tr>
+<tr><td>Main cost</td><td>Extra LLM calls that may plateau (no new information)</td><td>Slowest — a search/tool round every loop</td><td>Tool design + prompt discipline; unbounded if unmanaged</td></tr>
+<tr><td>One-line rule</td><td>Use when quality is subjective</td><td>Use when claims must be verifiable</td><td>Use when steps can't be enumerated upfront</td></tr>
+</table>
+<div class="map"><b>The compressed takeaway</b> (and the line the whole cheat sheet builds to): complexity buys power in a fixed order — reflection is polish, ReAct adds structure, Reflexion adds grounding. bangkit's plan-and-execute sits deliberately <em>outside</em> this spectrum because tutoring steps are enumerable; its verify_node borrows the smallest useful piece of the corrective family without paying any loop's full cost.</div>
 
 </div></body></html>
