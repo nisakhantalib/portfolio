@@ -375,6 +375,63 @@
   </section>
 
   <section class="detail-section dd">
+    <h2>Choosing the orchestration pattern &mdash; and why</h2>
+    <p>There are four established loop shapes for agentic systems. I studied all four hands-on (LangGraph, reflection, Reflexion, and ReAct labs) and chose deliberately. The differences come down to one question: <strong>who decides the next step, and when?</strong></p>
+    <div class="dd-fig">
+      <svg viewBox="0 0 880 240" role="img" aria-label="Four agentic orchestration patterns compared">
+        <defs><marker id="opArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5"/></marker></defs>
+        <g class="hiw-mono">
+          <rect x="10" y="16" width="200" height="200" rx="12" class="hiw-region"/>
+          <text x="110" y="40" text-anchor="middle" style="font-weight:700">plan-and-execute</text>
+          <text x="110" y="56" text-anchor="middle" class="hiw-s">(this project)</text>
+          <rect x="40" y="70" width="140" height="34" rx="8" class="hiw-box hiw-accent"/><text x="110" y="91" text-anchor="middle" class="hiw-s">plan once</text>
+          <rect x="40" y="120" width="140" height="34" rx="8" class="hiw-box"/><text x="110" y="141" text-anchor="middle" class="hiw-s">execute steps</text>
+          <line x1="110" y1="104" x2="110" y2="118" class="hiw-line" marker-end="url(#opArr)"/>
+          <path d="M180 137 C 205 137 205 87 180 87" class="hiw-line" fill="none" stroke-dasharray="3 3"/>
+          <text x="110" y="185" text-anchor="middle" class="hiw-s">steps fixed upfront</text>
+          <text x="110" y="201" text-anchor="middle" class="hiw-s">by the supervisor</text>
+
+          <rect x="230" y="16" width="200" height="200" rx="12" class="hiw-region"/>
+          <text x="330" y="40" text-anchor="middle" style="font-weight:700">ReAct</text>
+          <text x="330" y="56" text-anchor="middle" class="hiw-s">(studied)</text>
+          <rect x="260" y="70" width="140" height="34" rx="8" class="hiw-box"/><text x="330" y="91" text-anchor="middle" class="hiw-s">model reasons</text>
+          <rect x="260" y="120" width="140" height="34" rx="8" class="hiw-box"/><text x="330" y="141" text-anchor="middle" class="hiw-s">calls a tool</text>
+          <line x1="330" y1="104" x2="330" y2="118" class="hiw-line" marker-end="url(#opArr)"/>
+          <path d="M400 137 C 425 137 425 87 400 87" class="hiw-line" fill="none" marker-end="url(#opArr)"/>
+          <text x="330" y="185" text-anchor="middle" class="hiw-s">model decides every</text>
+          <text x="330" y="201" text-anchor="middle" class="hiw-s">step, stops itself</text>
+
+          <rect x="450" y="16" width="200" height="200" rx="12" class="hiw-region"/>
+          <text x="550" y="40" text-anchor="middle" style="font-weight:700">reflection</text>
+          <text x="550" y="56" text-anchor="middle" class="hiw-s">(studied)</text>
+          <rect x="480" y="70" width="140" height="34" rx="8" class="hiw-box"/><text x="550" y="91" text-anchor="middle" class="hiw-s">generate</text>
+          <rect x="480" y="120" width="140" height="34" rx="8" class="hiw-box"/><text x="550" y="141" text-anchor="middle" class="hiw-s">critique</text>
+          <line x1="550" y1="104" x2="550" y2="118" class="hiw-line" marker-end="url(#opArr)"/>
+          <path d="M620 137 C 645 137 645 87 620 87" class="hiw-line" fill="none" marker-end="url(#opArr)"/>
+          <text x="550" y="185" text-anchor="middle" class="hiw-s">loop until quality</text>
+          <text x="550" y="201" text-anchor="middle" class="hiw-s">gate / max iterations</text>
+
+          <rect x="670" y="16" width="200" height="200" rx="12" class="hiw-region"/>
+          <text x="770" y="40" text-anchor="middle" style="font-weight:700">Reflexion</text>
+          <text x="770" y="56" text-anchor="middle" class="hiw-s">(studied)</text>
+          <rect x="700" y="64" width="140" height="30" rx="8" class="hiw-box"/><text x="770" y="83" text-anchor="middle" class="hiw-s">generate + critique</text>
+          <rect x="700" y="104" width="140" height="30" rx="8" class="hiw-box hiw-violet"/><text x="770" y="123" text-anchor="middle" class="hiw-s">critique &rarr; new search</text>
+          <rect x="700" y="144" width="140" height="30" rx="8" class="hiw-box"/><text x="770" y="163" text-anchor="middle" class="hiw-s">revise + cite</text>
+          <line x1="770" y1="94" x2="770" y2="102" class="hiw-line" marker-end="url(#opArr)"/>
+          <line x1="770" y1="134" x2="770" y2="142" class="hiw-line" marker-end="url(#opArr)"/>
+          <path d="M840 159 C 866 159 866 79 840 79" class="hiw-line" fill="none" marker-end="url(#opArr)"/>
+          <text x="770" y="196" text-anchor="middle" class="hiw-s">critique drives fresh</text>
+          <text x="770" y="212" text-anchor="middle" class="hiw-s">retrieval each round</text>
+        </g>
+      </svg>
+      <p class="dd-cap">Same building blocks (nodes, edges, conditional routing) &mdash; four different answers to "who decides the next step".</p>
+    </div>
+    <p><strong>Why plan-and-execute here:</strong> a tutoring service has enumerable intents (tutor / quiz / mark) and real latency and cost budgets. Planning once &mdash; the supervisor decomposes the request into an ordered plan, then the graph executes it &mdash; means a predictable number of LLM calls per request, deterministic routing that 60+ tests can pin down, and evals that don't have to reason about open-ended loops. ReAct's model-decides-every-step loop earns its extra cost when the steps <em>can't</em> be enumerated upfront (open-ended research, general assistants) &mdash; which this product isn't.</p>
+    <p><strong>Where the studied patterns did shape this codebase:</strong> the verification node is the corrective-RAG idea from the reflection family, deliberately bounded to a single revision (availability beats perfection in a service); studying a reference multi-agent RAG architecture (DocChat) is what surfaced the hybrid-retrieval and verification gaps that became Milestone 8. And the honest line: full Reflexion &mdash; critique <em>generating new retrieval queries</em> across multiple rounds with accumulated history &mdash; is studied but not shipped; the natural home for it would be iteratively refining generated quiz questions.</p>
+    <p class="dd-src">In the code: <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/supervisor.py" target="_blank" rel="noreferrer">supervisor.py</a> (plan-and-execute) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/build.py" target="_blank" rel="noreferrer">build.py</a> (the loop) &middot; <a href="https://github.com/nisakhantalib/bangkit-agentic/blob/master/ai-service/app/graph/nodes.py" target="_blank" rel="noreferrer">nodes.py</a> (bounded verification)</p>
+  </section>
+
+  <section class="detail-section dd">
     <h2>Skills demonstrated &mdash; mapped to the code</h2>
     <p>Each core junior AI-engineering competency, tied to the file that implements it in this repo. And, honestly stated, what this project does <em>not</em> cover.</p>
     <div class="dd-skillgrid">
